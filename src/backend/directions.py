@@ -10,17 +10,10 @@ from geocoding import get_location_coords
 
 def get_travel_time(start_coords, end_coords, include_buffer=True):
     """
-    Calculate travel time between two coordinate points
-    
-    Args:
-        start_coords (str): Starting coordinates in "longitude,latitude" format
-        end_coords (str): Ending coordinates in "longitude,latitude" format
-        include_buffer (bool): Whether to include safety buffer time
-    
-    Returns:
-        int: Travel time in minutes (including buffer if enabled)
+    Calculate travel time using Naver Maps API (aligned with valid curl request).
     """
-    url = "https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving"
+    # UPDATED: Domain changed from 'naveropenapi' to 'maps' to match your curl command
+    url = "https://maps.apigw.ntruss.com/map-direction/v1/driving"
     
     headers = {
         "X-NCP-APIGW-API-KEY-ID": Config.NAVER_CLIENT_ID,
@@ -28,9 +21,9 @@ def get_travel_time(start_coords, end_coords, include_buffer=True):
     }
     
     params = {
-        "start": start_coords,
-        "goal": end_coords,
-        "option": "trafast"  # trafast = 실시간 빠른길
+        "start": start_coords, # Format: "long,lat"
+        "goal": end_coords,    # Format: "long,lat"
+        "option": "trafast"    # Optional: Remove this line to match curl default (traoptimal)
     }
     
     try:
@@ -39,29 +32,36 @@ def get_travel_time(start_coords, end_coords, include_buffer=True):
         if response.status_code == 200:
             data = response.json()
             
+            # Check if the API returned code 0 (Success) inside the JSON body
+            if data.get('code') != 0:
+                print(f"API Logical Error: {data.get('message')}")
+                return 0
+
             try:
-                # 밀리초(ms) 단위로 반환되므로 분(minute)으로 변환
-                duration_ms = data['route']['trafast'][0]['summary']['duration']
+                # Path data is usually under route -> trafast (or traoptimal) -> 0 -> summary
+                route_key = "trafast" if params.get("option") == "trafast" else "traoptimal"
+                
+                duration_ms = data['route'][route_key][0]['summary']['duration']
                 duration_min = int(duration_ms / 1000 / 60)
                 
-                # Add buffer time for safety margin
                 if include_buffer:
                     duration_min += Config.TRAVEL_TIME_BUFFER
                 
                 return duration_min
                 
             except (KeyError, IndexError) as e:
-                print(f"Error parsing directions response: {e}")
+                print(f"Error parsing directions response structure: {e}")
+                # Debug: Print keys to see what was returned
+                print(f"Available keys: {data.get('route', {}).keys()}")
                 return 0
         else:
-            print(f"Error: API returned status code {response.status_code}")
+            print(f"HTTP Error: {response.status_code}")
             print(f"Response: {response.text}")
             return 0
             
     except requests.exceptions.RequestException as e:
         print(f"Error making directions request: {e}")
         return 0
-
 
 def get_travel_time_from_addresses(start_address, end_address, include_buffer=True):
     """
@@ -113,4 +113,5 @@ if __name__ == "__main__":
         test_directions()
     except ValueError as e:
         print(f"Configuration error: {e}")
+
 
