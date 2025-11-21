@@ -5,7 +5,10 @@ FastAPI application exposing the YCC scheduler over HTTP.
 from __future__ import annotations
 
 from collections import defaultdict
+from pathlib import Path
 from typing import List, Optional
+
+import sys
 
 from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +18,10 @@ from .config import Config
 from .geocoding import get_location_coords
 from .sample_data import get_sample_schedule, get_sample_todos
 from .scheduler import allocate_tasks
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.append(str(ROOT_DIR))
 
 try:
     from daystack import get_crawler_tasks

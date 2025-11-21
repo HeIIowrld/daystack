@@ -86,7 +86,9 @@ def get_college_location(college_code):
     If not found, return default location.
     """
     # College code to building location mapping
+    '''
     college_locations = {
+        
         "KOR": "연세대학교 위당관",
         "CHI": "연세대학교 위당관",
         "CHN": "연세대학교 위당관",
@@ -136,12 +138,13 @@ def get_college_location(college_code):
         "CFM": "연세대학교 삼성관",
         "HEC": "연세대학교 삼성관"
     }
+    '''
     
     if college_code and college_code in college_locations:
         return college_locations[college_code]
     
     # Default location if not found
-    return "연세대학교"
+    return "연세로 50"
 
 
 def resolve_course_location(course_name: str) -> str:
