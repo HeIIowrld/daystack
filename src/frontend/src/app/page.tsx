@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { LiveTasksPanel } from "@/components/live-tasks-panel";
 import { MapView } from "@/components/map-view";
@@ -189,18 +190,26 @@ export default async function Home() {
     <div className="min-h-screen bg-zinc-50 py-10 font-sans text-zinc-900">
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6">
         <header className="rounded-3xl border border-zinc-200 bg-white px-8 py-10 shadow-md">
-          <div className="flex flex-wrap items-center gap-8">
-            <Image
-              src="/daystack-pill.svg"
-              alt="DAYSTACK wordmark"
-              width={200}
-              height={60}
-              priority
-              unoptimized
-            />
-            <p className="text-sm font-semibold uppercase tracking-[1.1em] text-emerald-600 whitespace-nowrap">
-              Travel-Time Optimizer
-            </p>
+          <div className="flex flex-wrap items-center justify-between gap-8">
+            <div className="flex flex-wrap items-center gap-8">
+              <Image
+                src="/daystack-pill.svg"
+                alt="DAYSTACK wordmark"
+                width={200}
+                height={60}
+                priority
+                unoptimized
+              />
+              <p className="text-sm font-semibold uppercase tracking-[1.1em] text-emerald-600 whitespace-nowrap">
+                Travel-Time Optimizer
+              </p>
+            </div>
+            <Link
+              href="/leaderboard"
+              className="rounded-full bg-emerald-100 px-6 py-2 text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-200"
+            >
+              View Leaderboard →
+            </Link>
           </div>
           <h1 className="mt-4 text-4xl font-semibold text-zinc-900">
             Travel-aware schedule optimizer
