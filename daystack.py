@@ -5,7 +5,7 @@ Optimizing your daily tasks with travel time consideration
 
 from scheduler import allocate_tasks, print_schedule
 from crawler import LMSCrawler
-
+from config import YONSEI_USERNAME, YONSEI_PASSWORD
 
 def get_schedule():
     """Get today's schedule (hardcoded for now)"""
@@ -30,7 +30,6 @@ def get_schedule():
         }
     ]
 
-
 def manual_input_tasks():
     """Manual task input"""
     print("\n📝 Enter tasks (empty line to finish):\n")
@@ -50,6 +49,28 @@ def manual_input_tasks():
     
     return tasks
 
+def convert_lms_tasks(lms_tasks):
+    """
+    Convert LMS crawler output to Scheduler format.
+    Since LMS doesn't provide 'duration', we set a default.
+    """
+    formatted_tasks = []
+    print(f"\n📥 Converting {len(lms_tasks)} LMS tasks...")
+    
+    for t in lms_tasks:
+        # Combine Course and Task Name for clarity
+        full_name = f"[{t['course']}] {t['task']}"
+        
+        # Heuristic: Default to 60 mins for assignments, can be adjusted
+        default_duration = 60 
+        
+        formatted_tasks.append({
+            "name": full_name,
+            "duration": default_duration,
+            # You can pass due_date to scheduler if it supports it
+            # "due_date": t['due_date'] 
+        })
+    return formatted_tasks
 
 def main():
     print("\n" + "="*60)
@@ -62,10 +83,26 @@ def main():
     print("  2. Manual input")
     
     choice = input("\nChoice (1/2): ").strip()
-    
+    tasks = []
+
     if choice == '1':
-        crawler = LMSCrawler("https://coursemos.co.kr")
-        tasks = crawler.fetch_tasks()
+        if YONSEI_USERNAME and YONSEI_PASSWORD:
+            print("Using credentials from .env file...")
+            crawler = LMSCrawler(YONSEI_USERNAME, YONSEI_PASSWORD)
+            
+            # --- FIX: MUST LOGIN BEFORE FETCHING ---
+            if crawler.login():
+                raw_tasks = crawler.fetch_tasks()
+                if raw_tasks:
+                    tasks = convert_lms_tasks(raw_tasks)
+                else:
+                    print("⚠️  Login successful, but no incomplete tasks found.")
+            else:
+                print("❌ Login failed. Please check your credentials.")
+                return
+        else:
+            print("❌ No credentials found in .env")
+            return
     else:
         tasks = manual_input_tasks()
     
@@ -84,15 +121,14 @@ def main():
     
     # Optimize
     print("\n🔄 Optimizing...")
+    # Ensure allocate_tasks exists and accepts these arguments
     optimized = allocate_tasks(schedule, tasks)
     
     # Display result
     print_schedule(optimized)
-
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
         print("\n\nExiting...")
-
