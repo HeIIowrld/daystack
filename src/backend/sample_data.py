@@ -62,19 +62,19 @@ FALLBACK_SCHEDULE: List[Dict[str, str]] = [
         "name": "오전 수업",
         "start_time": "09:00",
         "end_time": "12:00",
-        "location": "강남역",
+        "location": "연세로 50",
     },
     {
         "name": "점심",
         "start_time": "12:30",
         "end_time": "13:30",
-        "location": "강남역",
+        "location": "서울특별시 마포구 양화로 160",
     },
     {
         "name": "아르바이트",
         "start_time": "16:00",
         "end_time": "20:00",
-        "location": "판교역",
+        "location": "경기도 성남시 분당구 판교역로 160",
     },
 ]
 
