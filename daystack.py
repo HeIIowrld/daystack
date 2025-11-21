@@ -20,19 +20,19 @@ FALLBACK_SCHEDULE = [
         "name": "오전 수업",
         "start_time": "09:00",
         "end_time": "12:00",
-        "location": "강남역",
+        "location": "연세로 50",
     },
     {
         "name": "점심",
         "start_time": "12:30",
         "end_time": "13:30",
-        "location": "강남역",
+        "location": "서울특별시 마포구 양화로 160",
     },
     {
         "name": "아르바이트",
         "start_time": "16:00",
         "end_time": "20:00",
-        "location": "판교역",
+        "location": "경기도 성남시 분당구 판교역로 160",
     },
 ]
 
@@ -189,6 +189,37 @@ def format_task_label(raw_course: str, task_title: str) -> str:
     return formatted
 
 
+def estimate_task_time(task_title: str) -> int:
+    """
+    Estimate time required for a task based on keywords in the title.
+    
+    Args:
+        task_title (str): Title of the task
+        
+    Returns:
+        int: Estimated time in minutes
+    """
+    title_lower = task_title.lower()
+    
+    # Keyword-based heuristics
+    if "프로젝트" in title_lower or "project" in title_lower:
+        return 180  # 3 hours
+    elif "레포트" in title_lower or "report" in title_lower or "보고서" in title_lower:
+        return 90   # 1.5 hours
+    elif "과제" in title_lower or "assignment" in title_lower or "homework" in title_lower:
+        return 60   # 1 hour
+    elif "퀴즈" in title_lower or "quiz" in title_lower:
+        return 30   # 30 minutes
+    elif "시험" in title_lower or "exam" in title_lower or "test" in title_lower:
+        return 120  # 2 hours
+    elif "발표" in title_lower or "presentation" in title_lower:
+        return 90   # 1.5 hours
+    elif "읽기" in title_lower or "reading" in title_lower:
+        return 45   # 45 minutes
+    else:
+        return 60   # Default: 1 hour
+
+
 def convert_lms_tasks(lms_tasks):
     """
     Convert LMS crawler output to Scheduler format.
@@ -204,21 +235,21 @@ def convert_lms_tasks(lms_tasks):
         # Combine Course and Task Name for clarity
         full_name = format_task_label(course_name, t['task'])
         
-        # Heuristic: Default to 60 mins for assignments, can be adjusted
-        default_duration = 60 
+        # Smart time estimation based on task title keywords
+        estimated_time = estimate_task_time(t['task'])
         
         formatted_tasks.append({
             "task": full_name,
-            "estimated_time": default_duration,
+            "estimated_time": estimated_time,
             "course": course_name,
             "location": location,
         })
         
         college_code = parse_course_id(course_name)
         if college_code:
-            print(f"  ✓ {course_name} → {college_code} → {location}")
+            print(f"  ✓ {course_name} → {college_code} → {location} ({estimated_time}분)")
         else:
-            print(f"  ⚠ {course_name} → (no course ID found) → {location}")
+            print(f"  ⚠ {course_name} → (no course ID found) → {location} ({estimated_time}분)")
     
     return formatted_tasks
 
