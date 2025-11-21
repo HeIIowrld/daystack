@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type LeaderboardEntry = {
   name: string;
   role: string;
@@ -86,6 +88,14 @@ export default function LeaderboardPage() {
     <div className="min-h-screen bg-gradient-to-b from-zinc-50 via-white to-emerald-50 px-6 py-12 text-zinc-900">
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-8">
         <header className="rounded-3xl border border-emerald-100 bg-white/90 px-8 py-10 shadow-lg shadow-emerald-100/70">
+          <div className="mb-4">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-sm font-medium text-emerald-700 hover:text-emerald-800"
+            >
+              ← Back to Schedule
+            </Link>
+          </div>
           <div className="flex flex-wrap items-center gap-3">
             <span className="rounded-full bg-emerald-100 px-4 py-1 text-sm font-semibold text-emerald-800">
               Team leaderboard
