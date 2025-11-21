@@ -24,7 +24,7 @@ def get_location_coords(address):
         print(f"Error: Empty address provided")
         return None
     
-    url = f"https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode"
+    url = f"https://maps.apigw.ntruss.com/map-direction/v1/driving"
     headers = {
         "X-NCP-APIGW-API-KEY-ID": Config.NAVER_CLIENT_ID,
         "X-NCP-APIGW-API-KEY": Config.NAVER_CLIENT_SECRET,
