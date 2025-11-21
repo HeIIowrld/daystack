@@ -21,19 +21,19 @@ def get_schedule() -> List[Dict]:
             "name": "오전 수업",
             "start_time": "09:00",
             "end_time": "12:00",
-            "location": "강남역",
+            "location": "서울특별시 강남구 강남대로 396",
         },
         {
             "name": "점심",
             "start_time": "12:30",
             "end_time": "13:30",
-            "location": "강남역",
+            "location": "서울특별시 강남구 강남대로 396",
         },
         {
             "name": "아르바이트",
             "start_time": "16:00",
             "end_time": "20:00",
-            "location": "판교역",
+            "location": "경기도 성남시 분당구 판교역로 160",
         },
     ]
 
@@ -81,7 +81,9 @@ def get_college_location(college_code):
     If not found, return default location.
     """
     # College code to building location mapping
+    '''
     college_locations = {
+        
         "KOR": "연세대학교 위당관",
         "CHI": "연세대학교 위당관",
         "CHN": "연세대학교 위당관",
@@ -131,12 +133,13 @@ def get_college_location(college_code):
         "CFM": "연세대학교 삼성관",
         "HEC": "연세대학교 삼성관"
     }
+    '''
     
     if college_code and college_code in college_locations:
         return college_locations[college_code]
     
     # Default location if not found
-    return "연세대학교"
+    return "연세로 50"
 
 
 def convert_lms_tasks(lms_tasks):
