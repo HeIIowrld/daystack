@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { LiveTasksPanel } from "@/components/live-tasks-panel";
 import { MapView } from "@/components/map-view";
+import { ScheduleManager } from "@/components/schedule-manager";
 import { fetchSampleData } from "@/lib/api";
 import {
   OptimizeResponse,
@@ -255,6 +256,7 @@ export default async function Home() {
         ) : (
           <>
             <InsightsPanel insights={data.insights} />
+            <ScheduleManager />
             <MapView items={data.optimized_schedule} />
             <LiveTasksPanel />
             <div className="grid gap-6 md:grid-cols-2">

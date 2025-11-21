@@ -52,3 +52,53 @@ export async function optimizeSchedule(payload: {
 export async function fetchLiveTasks(): Promise<LiveTaskResponse> {
   return request<LiveTaskResponse>('/tasks/live', undefined, { revalidate: false });
 }
+
+// Schedule Management Functions
+export async function fetchSchedule(): Promise<ScheduleItem[]> {
+  return request<ScheduleItem[]>('/schedule', undefined, { revalidate: false });
+}
+
+export async function addScheduleItem(item: ScheduleItem): Promise<ScheduleItem> {
+  return request<ScheduleItem>(
+    '/schedule',
+    {
+      method: 'POST',
+      body: JSON.stringify(item),
+    },
+    { revalidate: false },
+  );
+}
+
+export async function updateScheduleItem(
+  itemId: string,
+  item: ScheduleItem,
+): Promise<ScheduleItem> {
+  return request<ScheduleItem>(
+    `/schedule/${itemId}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(item),
+    },
+    { revalidate: false },
+  );
+}
+
+export async function deleteScheduleItem(itemId: string): Promise<{ message: string; id: string }> {
+  return request<{ message: string; id: string }>(
+    `/schedule/${itemId}`,
+    {
+      method: 'DELETE',
+    },
+    { revalidate: false },
+  );
+}
+
+export async function resetSchedule(): Promise<{ message: string; count: number }> {
+  return request<{ message: string; count: number }>(
+    '/schedule/reset',
+    {
+      method: 'POST',
+    },
+    { revalidate: false },
+  );
+}

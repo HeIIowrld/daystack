@@ -4,6 +4,7 @@ export type Coordinates = {
 };
 
 export type ScheduleItem = {
+  id?: string;
   name: string;
   location?: string;
   start_time?: string;

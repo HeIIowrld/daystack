@@ -5,8 +5,10 @@ FastAPI application exposing the YCC scheduler over HTTP.
 from __future__ import annotations
 
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
+import uuid
 
 import sys
 
@@ -44,6 +46,7 @@ class Coordinates(BaseModel):
 
 
 class ScheduleItem(BaseModel):
+    id: Optional[str] = None  # For updates/deletes
     name: str
     location: Optional[str] = None
     start_time: Optional[str] = None
@@ -118,6 +121,9 @@ app.add_middleware(
 )
 
 router = APIRouter(prefix="/api", tags=["scheduler"])
+
+# In-memory schedule storage (in production, use a database)
+_schedule_store: List[dict] = []
 
 
 @app.get("/health")
@@ -224,7 +230,14 @@ def _run_optimization(
 @router.get("/sample", response_model=OptimizeResponse)
 async def sample_data() -> OptimizeResponse:
     """Return sample schedule, tasks, and the optimized output."""
-    schedule = [ScheduleItem(**item) for item in get_sample_schedule()]
+    sample_schedule = get_sample_schedule()
+    # Add IDs to sample schedule items if not present
+    schedule = []
+    for item in sample_schedule:
+        item_dict = dict(item)
+        if "id" not in item_dict:
+            item_dict["id"] = str(uuid.uuid4())
+        schedule.append(ScheduleItem(**item_dict))
     todos = [TodoItem(**item) for item in get_sample_todos()]
     return _run_optimization(schedule, todos)
 
@@ -267,6 +280,127 @@ async def live_tasks() -> LiveTaskResponse:
             for loc, count in sorted(campus_counter.items())
         ],
     )
+
+
+# Schedule Management Endpoints
+@router.get("/schedule", response_model=List[ScheduleItem])
+async def get_schedule() -> List[ScheduleItem]:
+    """Get all schedule items."""
+    # If store is empty, return sample schedule
+    if not _schedule_store:
+        sample = get_sample_schedule()
+        return [ScheduleItem(**item) for item in sample]
+    return [ScheduleItem(**item) for item in _schedule_store]
+
+
+@router.post("/schedule", response_model=ScheduleItem)
+async def add_schedule_item(item: ScheduleItem) -> ScheduleItem:
+    """Add a new schedule item."""
+    # Generate ID if not provided
+    if not item.id:
+        item.id = str(uuid.uuid4())
+    
+    # Validate time format
+    if item.start_time:
+        try:
+            datetime.strptime(item.start_time, "%H:%M")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid start_time format. Use HH:MM")
+    
+    if item.end_time:
+        try:
+            datetime.strptime(item.end_time, "%H:%M")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid end_time format. Use HH:MM")
+    
+    # Validate time order
+    if item.start_time and item.end_time:
+        start = datetime.strptime(item.start_time, "%H:%M")
+        end = datetime.strptime(item.end_time, "%H:%M")
+        if end <= start:
+            raise HTTPException(status_code=400, detail="end_time must be after start_time")
+    
+    item_dict = item.model_dump(exclude_none=True)
+    _schedule_store.append(item_dict)
+    
+    # Sort by start_time
+    _schedule_store.sort(key=lambda x: x.get("start_time", x.get("end_time", "")))
+    
+    return ScheduleItem(**item_dict)
+
+
+@router.put("/schedule/{item_id}", response_model=ScheduleItem)
+async def update_schedule_item(item_id: str, item: ScheduleItem) -> ScheduleItem:
+    """Update an existing schedule item."""
+    # Find item by ID
+    index = None
+    for i, stored_item in enumerate(_schedule_store):
+        if stored_item.get("id") == item_id:
+            index = i
+            break
+    
+    if index is None:
+        raise HTTPException(status_code=404, detail="Schedule item not found")
+    
+    # Validate time format
+    if item.start_time:
+        try:
+            datetime.strptime(item.start_time, "%H:%M")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid start_time format. Use HH:MM")
+    
+    if item.end_time:
+        try:
+            datetime.strptime(item.end_time, "%H:%M")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid end_time format. Use HH:MM")
+    
+    # Validate time order
+    if item.start_time and item.end_time:
+        start = datetime.strptime(item.start_time, "%H:%M")
+        end = datetime.strptime(item.end_time, "%H:%M")
+        if end <= start:
+            raise HTTPException(status_code=400, detail="end_time must be after start_time")
+    
+    # Update item (preserve ID)
+    item_dict = item.model_dump(exclude_none=True)
+    item_dict["id"] = item_id
+    _schedule_store[index] = item_dict
+    
+    # Sort by start_time
+    _schedule_store.sort(key=lambda x: x.get("start_time", x.get("end_time", "")))
+    
+    return ScheduleItem(**item_dict)
+
+
+@router.delete("/schedule/{item_id}")
+async def delete_schedule_item(item_id: str) -> dict:
+    """Delete a schedule item."""
+    # Find item by ID
+    index = None
+    for i, stored_item in enumerate(_schedule_store):
+        if stored_item.get("id") == item_id:
+            index = i
+            break
+    
+    if index is None:
+        raise HTTPException(status_code=404, detail="Schedule item not found")
+    
+    _schedule_store.pop(index)
+    return {"message": "Schedule item deleted", "id": item_id}
+
+
+@router.post("/schedule/reset")
+async def reset_schedule() -> dict:
+    """Reset schedule to sample data."""
+    global _schedule_store
+    sample = get_sample_schedule()
+    _schedule_store = []
+    for item in sample:
+        item_dict = dict(item)
+        item_dict["id"] = str(uuid.uuid4())
+        _schedule_store.append(item_dict)
+    return {"message": "Schedule reset to sample data", "count": len(_schedule_store)}
 
 
 app.include_router(router)
