@@ -4,6 +4,7 @@ FastAPI application exposing the YCC scheduler over HTTP.
 
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import List, Optional
 
 from fastapi import APIRouter, FastAPI, HTTPException
@@ -54,6 +55,18 @@ class SchedulerMeta(BaseModel):
     travel_time_buffer: int
 
 
+class CampusBreakdown(BaseModel):
+    location: str
+    count: int
+
+
+class ScheduleInsights(BaseModel):
+    total_tasks: int
+    scheduled_tasks: int
+    remaining_tasks: int
+    campus_breakdown: List[CampusBreakdown]
+
+
 class OptimizeRequest(BaseModel):
     schedule: List[ScheduleItem]
     todos: List[TodoItem]
@@ -65,6 +78,7 @@ class OptimizeResponse(BaseModel):
     optimized_schedule: List[ScheduleItem]
     remaining_todos: List[TodoItem]
     meta: SchedulerMeta
+    insights: ScheduleInsights
 
 
 app = FastAPI(
@@ -158,6 +172,21 @@ def _run_optimization(
 
     optimized_models = [ScheduleItem(**entry) for entry in optimized_schedule]
 
+    campus_counter = defaultdict(int)
+    for todo in todos:
+        location = todo.location or "위치 미정"
+        campus_counter[location] += 1
+
+    insights = ScheduleInsights(
+        total_tasks=len(todos),
+        scheduled_tasks=len(todos) - len(remaining),
+        remaining_tasks=len(remaining),
+        campus_breakdown=[
+            CampusBreakdown(location=loc, count=count)
+            for loc, count in sorted(campus_counter.items())
+        ],
+    )
+
     return OptimizeResponse(
         schedule=_attach_coordinates(schedule, coord_cache),
         todos=todos,
@@ -169,6 +198,7 @@ def _run_optimization(
             config_ready=_config_ready(),
             travel_time_buffer=Config.TRAVEL_TIME_BUFFER,
         ),
+        insights=insights,
     )
 
 

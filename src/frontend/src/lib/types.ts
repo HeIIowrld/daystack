@@ -9,7 +9,7 @@ export type ScheduleItem = {
   start_time?: string;
   end_time?: string;
   type?: string;
-  coordinates?: Coordinates | null;
+  coordinates?: Coordinates;
 };
 
 export type TodoItem = {
@@ -26,10 +26,23 @@ export type SchedulerMeta = {
   travel_time_buffer: number;
 };
 
+export type CampusBreakdown = {
+  location: string;
+  count: number;
+};
+
+export type ScheduleInsights = {
+  total_tasks: number;
+  scheduled_tasks: number;
+  remaining_tasks: number;
+  campus_breakdown: CampusBreakdown[];
+};
+
 export type OptimizeResponse = {
   schedule: ScheduleItem[];
   todos: TodoItem[];
   optimized_schedule: ScheduleItem[];
   remaining_todos: TodoItem[];
   meta: SchedulerMeta;
+  insights: ScheduleInsights;
 };

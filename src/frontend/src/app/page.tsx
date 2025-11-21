@@ -1,8 +1,13 @@
 import Image from "next/image";
 
+import { MapView } from "@/components/map-view";
 import { fetchSampleData } from "@/lib/api";
-import { OptimizeResponse, ScheduleItem, TodoItem } from "@/lib/types";
-import { ScheduleMap } from "./schedule-map";
+import {
+  OptimizeResponse,
+  ScheduleInsights,
+  ScheduleItem,
+  TodoItem,
+} from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -118,6 +123,55 @@ function RemainingTodoSection({ todos }: { todos: TodoItem[] }) {
   );
 }
 
+function InsightsPanel({ insights }: { insights: ScheduleInsights }) {
+  return (
+    <section className="rounded-2xl border border-zinc-200 bg-white/70 p-5 shadow-sm">
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl bg-zinc-900 px-5 py-4 text-white">
+          <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
+            Total Tasks
+          </p>
+          <p className="mt-2 text-3xl font-semibold">{insights.total_tasks}</p>
+        </div>
+        <div className="rounded-2xl bg-emerald-50 px-5 py-4 text-emerald-900">
+          <p className="text-xs uppercase tracking-[0.3em] text-emerald-700">
+            Scheduled
+          </p>
+          <p className="mt-2 text-3xl font-semibold">
+            {insights.scheduled_tasks}
+          </p>
+        </div>
+        <div className="rounded-2xl bg-rose-50 px-5 py-4 text-rose-900">
+          <p className="text-xs uppercase tracking-[0.3em] text-rose-700">
+            Remaining
+          </p>
+          <p className="mt-2 text-3xl font-semibold">
+            {insights.remaining_tasks}
+          </p>
+        </div>
+      </div>
+      <div className="mt-6">
+        <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
+          Campus Breakdown
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {insights.campus_breakdown.map((entry) => (
+            <span
+              key={entry.location}
+              className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-1 text-sm"
+            >
+              <span className="font-semibold text-zinc-900">
+                {entry.location}
+              </span>
+              <span className="text-zinc-500">{entry.count}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 async function loadSample(): Promise<OptimizeResponse | null> {
   try {
     return await fetchSampleData();
@@ -187,7 +241,8 @@ export default async function Home() {
           </section>
         ) : (
           <>
-            <ScheduleMap items={data.optimized_schedule} />
+            <InsightsPanel insights={data.insights} />
+            <MapView items={data.optimized_schedule} />
             <div className="grid gap-6 md:grid-cols-2">
               <ScheduleSection title="Original Schedule" items={data.schedule} />
               <ScheduleSection
