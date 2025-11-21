@@ -9,11 +9,7 @@ export type ScheduleItem = {
   start_time?: string;
   end_time?: string;
   type?: string;
-<<<<<<< HEAD
-  coordinates?: Coordinates;
-=======
   coordinates?: Coordinates | null;
->>>>>>> 5a1bfb6 (scheduling algorithm)
 };
 
 export type TodoItem = {
@@ -21,6 +17,8 @@ export type TodoItem = {
   estimated_time: number;
   deadline?: string;
   course?: string;
+  link?: string;
+  source?: string;
 };
 
 export type SchedulerMeta = {

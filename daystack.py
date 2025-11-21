@@ -3,39 +3,43 @@ DAYSTACK - To-do list Tetris
 Optimizing your daily tasks with travel time consideration
 """
 
-from typing import Dict, List, Tuple
+from __future__ import annotations
 
 from typing import Dict, List, Tuple
 
-from scheduler import allocate_tasks, print_schedule
 from crawler import LMSCrawler
+from scheduler import allocate_tasks, print_schedule
 from config import YONSEI_USERNAME, YONSEI_PASSWORD
 
-def get_schedule():
-    """Get today's schedule (hardcoded for now)"""
+DEFAULT_TASK_DURATION = 60
+
+
+def get_schedule() -> List[Dict]:
+    """Return today's sample schedule."""
     return [
         {
             "name": "오전 수업",
             "start_time": "09:00",
             "end_time": "12:00",
-            "location": "강남역"
+            "location": "강남역",
         },
         {
             "name": "점심",
             "start_time": "12:30",
             "end_time": "13:30",
-            "location": "강남역"
+            "location": "강남역",
         },
         {
             "name": "아르바이트",
             "start_time": "16:00",
             "end_time": "20:00",
-            "location": "판교역"
-        }
+            "location": "판교역",
+        },
     ]
 
-def manual_input_tasks():
-    """Manual task input"""
+
+def manual_input_tasks() -> List[Dict]:
+    """Collect tasks from the CLI user."""
     print("\n📝 Enter tasks (empty line to finish):\n")
     tasks: List[Dict] = []
     
@@ -43,17 +47,22 @@ def manual_input_tasks():
         name = input("Task name: ").strip()
         if not name:
             break
-        
+
         try:
             duration = int(input("Duration (minutes): ").strip())
             tasks.append({"task": name, "estimated_time": duration})
             print("✓ Added\n")
         except ValueError:
             print("✗ Invalid duration\n")
-    
+            continue
+
+        tasks.append({"task": name, "estimated_time": duration})
+        print("✓ Added\n")
+
     return tasks
 
-def convert_lms_tasks(lms_tasks):
+
+def convert_lms_tasks(lms_tasks: List[Dict]) -> List[Dict]:
     """
     Convert LMS crawler output to Scheduler format.
     Scheduler expects: 'task' and 'estimated_time'
@@ -75,40 +84,57 @@ def convert_lms_tasks(lms_tasks):
         })
     return formatted_tasks
 
-def main():
-    print("\n" + "="*60)
-    print("  DAYSTACK - To-do List Tetris")
-    print("="*60)
-    
-    # Get tasks
-    print("\nHow to get tasks?")
-    print("  1. Fetch from LMS (mock data)")
-    print("  2. Manual input")
-    
-    choice = input("\nChoice (1/2): ").strip()
-    tasks = []
 
-    if choice == '1':
-        if YONSEI_USERNAME and YONSEI_PASSWORD:
-            print("Using credentials from .env file...")
-            crawler = LMSCrawler(YONSEI_USERNAME, YONSEI_PASSWORD)
-            
-            # --- FIX: MUST LOGIN BEFORE FETCHING ---
-            if crawler.login():
-                raw_tasks = crawler.fetch_tasks()
-                if raw_tasks:
-                    tasks = convert_lms_tasks(raw_tasks)
-                else:
-                    print("⚠️  Login successful, but no incomplete tasks found.")
-            else:
-                print("❌ Login failed. Please check your credentials.")
-                return
-        else:
-            print("❌ No credentials found in .env")
-            return
-    else:
+def get_crawler_tasks(username: str | None = None, password: str | None = None) -> List[Dict]:
+    """Fetch and convert tasks from the LMS crawler."""
+    username = username or YONSEI_USERNAME
+    password = password or YONSEI_PASSWORD
+
+    if not username or not password:
+        print("⚠️  Missing LMS credentials. Set YONSEI_USERNAME and YONSEI_PASSWORD.")
+        return []
+
+    crawler = LMSCrawler(username, password)
+    if not crawler.login():
+        print("❌ Login failed. Please check your credentials.")
+        return []
+
+    raw_tasks = crawler.fetch_tasks()
+    if not raw_tasks:
+        print("⚠️  Login successful, but no incomplete tasks found.")
+        return []
+
+    return convert_lms_tasks(raw_tasks)
+
+
+def get_daystack_data(source: str = "crawler") -> Tuple[List[Dict], List[Dict]]:
+    """Shared helper for CLI/API to retrieve schedule and tasks."""
+    schedule = get_schedule()
+
+    if source == "crawler":
+        tasks = get_crawler_tasks()
+    elif source == "manual":
         tasks = manual_input_tasks()
-    
+    else:
+        raise ValueError("Unknown task source: expected 'crawler' or 'manual'")
+
+    return schedule, tasks
+
+
+def main():
+    print("\n" + "=" * 60)
+    print("  DAYSTACK - To-do List Tetris")
+    print("=" * 60)
+
+    print("\nHow to get tasks?")
+    print("  1. Fetch from LMS (requires credentials)")
+    print("  2. Manual input")
+
+    choice = input("\nChoice (1/2): ").strip()
+    source = "crawler" if choice == "1" else "manual"
+
+    schedule, tasks = get_daystack_data(source)
+
     if not tasks:
         print("⚠️  No tasks to schedule")
         return
@@ -118,8 +144,8 @@ def main():
     
     print("\n📅 Today's Schedule:")
     for event in schedule:
-        start = event.get('start_time', '')
-        end = event.get('end_time', '')
+        start = event.get("start_time", "")
+        end = event.get("end_time", "")
         print(f"  {start}-{end}: {event['name']} @ {event['location']}")
     
     print("\n📚 Tasks:")
@@ -129,11 +155,9 @@ def main():
     
     # Optimize
     print("\n🔄 Optimizing...")
-    # Ensure allocate_tasks exists and accepts these arguments
     optimized = allocate_tasks(schedule, tasks)
-    
-    # Display result
     print_schedule(optimized)
+
 
 if __name__ == "__main__":
     try:

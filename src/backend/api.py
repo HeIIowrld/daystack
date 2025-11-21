@@ -4,7 +4,7 @@ FastAPI application exposing the YCC scheduler over HTTP.
 
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,24 +32,21 @@ class Coordinates(BaseModel):
 
 class ScheduleItem(BaseModel):
     name: str
-    location: str | None = None
-    start_time: str | None = None
-    end_time: str | None = None
-    type: str | None = None
-    coordinates: "Coordinates" | None = None
-
-
-class Coordinates(BaseModel):
-    lat: float
-    lng: float
+    location: Optional[str] = None
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    type: Optional[str] = None
+    coordinates: Optional[Coordinates] = None
 
 
 class TodoItem(BaseModel):
     task: str
     estimated_time: int = Field(..., gt=0, description="Minutes required")
-    location: str | None = None
-    deadline: str | None = None
-    course: str | None = None
+    location: Optional[str] = None
+    deadline: Optional[str] = None
+    course: Optional[str] = None
+    link: Optional[str] = None
+    source: Optional[str] = None
 
 
 class SchedulerMeta(BaseModel):
@@ -93,7 +90,13 @@ router = APIRouter(prefix="/api", tags=["scheduler"])
 @app.get("/health")
 async def health():
     """Simple health endpoint for uptime checks."""
-    return {"status": "ok"}
+    return {"status": "ok ok ok"}
+
+
+@app.get("/health-2", response_model=SchedulerMeta)
+async def health():
+    """Simple health endpoint for uptime checks."""
+    return SchedulerMeta(config_ready=True, travel_time_buffer=1)
 
 
 @router.get("/status", response_model=SchedulerMeta)
@@ -109,7 +112,7 @@ def _run_optimization(
     schedule: List[ScheduleItem],
     todos: List[TodoItem],
 ) -> OptimizeResponse:
-    def _parse_coordinates(raw: str | None) -> Coordinates | None:
+    def _parse_coordinates(raw: Optional[str]) -> Optional[Coordinates]:
         if not raw:
             return None
         try:

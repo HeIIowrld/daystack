@@ -23,7 +23,7 @@ async function request<T>(
     throw new Error(`API request failed (${response.status}): ${detail}`);
   }
 
-  return response.json();
+  return await response.json();
 }
 
 export async function fetchSampleData(): Promise<OptimizeResponse> {

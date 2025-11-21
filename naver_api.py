@@ -1,14 +1,14 @@
 """Naver API wrapper - Geocoding and Directions"""
 import requests
-from config import NAVER_CLIENT_ID, NAVER_CLIENT_SECRET, TRAVEL_TIME_BUFFER
+from config import NAVER_CLIENT_ID, NAVER_CLIENT_SECRET, TRAVEL_TIME_BUFFER, LOC_CLIENT_ID, LOC_CLIENT_SECRET
 
 # 1. CRITICAL FIX: Ensure no hidden newlines/spaces exist
-CLIENT_ID = str(NAVER_CLIENT_ID).strip()
-CLIENT_SECRET = str(NAVER_CLIENT_SECRET).strip()
+CLIENT_ID = str(LOC_CLIENT_ID).strip()
+CLIENT_SECRET = str(LOC_CLIENT_SECRET).strip()
 
 def geocode(address):
     """Convert address to coordinates (longitude,latitude)"""
-    url = "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode"
+    url = "https://maps.apigw.ntruss.com/map-geocode/v2/geocode"
     
     # 2. Use Standard Capitalization
     headers = {

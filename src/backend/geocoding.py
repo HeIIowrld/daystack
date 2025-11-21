@@ -25,7 +25,7 @@ def get_location_coords(address):
         print(f"Error: Empty address provided")
         return None
     
-    url = f"https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode"
+    url = "https://maps.apigw.ntruss.com/map-geocode/v2/geocode"
     headers = {
         "X-NCP-APIGW-API-KEY-ID": Config.LOC_CLIENT_ID,
         "X-NCP-APIGW-API-KEY": Config.LOC_CLIENT_SECRET,
@@ -33,6 +33,8 @@ def get_location_coords(address):
     params = {
         "query": address
     }
+
+    print(headers)
     
     try:
         response = requests.get(url, headers=headers, params=params)
@@ -49,6 +51,7 @@ def get_location_coords(address):
                 print(f"Warning: No results found for address: {address}")
                 return None
         else:
+            print(f'URL: {url}')
             print(f"Error: API returned status code {response.status_code}")
             print(f"Response: {response.text}")
             return None

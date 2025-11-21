@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo } from "react";
 
 import type { ScheduleItem } from "@/lib/types";
@@ -98,11 +99,17 @@ export function ScheduleMap({ items }: { items: ScheduleItem[] }) {
       </div>
 
       <div className="mt-4 overflow-hidden rounded-xl border border-zinc-100 bg-zinc-50">
-        <img
-          src={mapUrl}
-          alt="Map preview of the optimized schedule"
-          className="h-[360px] w-full object-cover"
-        />
+        <div className="relative h-[360px] w-full">
+          <Image
+            src={mapUrl}
+            alt="Map preview of the optimized schedule"
+            fill
+            sizes="(max-width: 768px) 100vw, 100vw"
+            className="object-cover"
+            unoptimized
+            priority
+          />
+        </div>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs text-zinc-600">

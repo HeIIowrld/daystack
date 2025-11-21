@@ -1,6 +1,5 @@
 import Image from "next/image";
 
-import { MapView } from "@/components/map-view";
 import { fetchSampleData } from "@/lib/api";
 import { OptimizeResponse, ScheduleItem, TodoItem } from "@/lib/types";
 import { ScheduleMap } from "./schedule-map";
@@ -72,7 +71,7 @@ function TodoBoard({
         {todos.map((todo) => (
           <li
             key={todo.task}
-            className="flex items-center justify-between rounded-xl border border-zinc-100 bg-zinc-50/60 px-4 py-3 text-zinc-900"
+            className="rounded-xl border border-zinc-100 bg-zinc-50/60 px-4 py-3 text-zinc-900"
           >
             <div>
               <p className="font-medium">{todo.task}</p>
@@ -105,7 +104,7 @@ function RemainingTodoSection({ todos }: { todos: TodoItem[] }) {
           {todos.map((todo) => (
             <li
               key={todo.task}
-              className="flex items-center justify-between rounded-xl border border-amber-100 bg-white/80 px-4 py-3 text-amber-900"
+              className="rounded-xl border border-amber-100 bg-white/80 px-4 py-3 text-amber-900"
             >
               <span>{todo.task}</span>
               <span className="text-sm font-medium">
@@ -135,16 +134,16 @@ export default async function Home() {
     <div className="min-h-screen bg-zinc-50 py-10 font-sans text-zinc-900">
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6">
         <header className="rounded-3xl border border-zinc-200 bg-white px-8 py-10 shadow-md">
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-8">
             <Image
-              src="/daystack-logo.svg"
-              alt="DAYSTACK logo"
-              width={160}
-              height={40}
+              src="/daystack-pill.svg"
+              alt="DAYSTACK wordmark"
+              width={200}
+              height={60}
               priority
               unoptimized
             />
-            <p className="text-sm uppercase tracking-[0.3em] text-emerald-600">
+            <p className="text-sm font-semibold uppercase tracking-[1.1em] text-emerald-600 whitespace-nowrap">
               Travel-Time Optimizer
             </p>
           </div>
@@ -152,15 +151,9 @@ export default async function Home() {
             Travel-aware schedule optimizer
           </h1>
           <p className="mt-3 max-w-3xl text-lg text-zinc-600">
-<<<<<<< HEAD
-            DAYSTACK 메인 컨트롤러의 스케줄/과제 데이터를 FastAPI 백엔드에서
-            가져와 시각화합니다. 백엔드가 Coursemos 크롤러를 통해 과제를 모으고
-            스케줄러에 전달하면, 이 페이지는 결과를 즉시 보여줍니다.
-=======
             The backend API combines your course schedule, tasks, and travel
             time to build an optimized day plan. Ensure the FastAPI server is
             running locally and map credentials are configured to see live data.
->>>>>>> 5a1bfb6 (scheduling algorithm)
           </p>
           <div className="mt-6 flex flex-wrap gap-4 text-sm text-zinc-500">
             <span className="rounded-full bg-zinc-100 px-4 py-1">
@@ -194,12 +187,6 @@ export default async function Home() {
           </section>
         ) : (
           <>
-<<<<<<< HEAD
-            <MapView schedule={data.optimized_schedule} />
-            <div className="grid gap-6 md:grid-cols-2">
-              <ScheduleSection title="Original Schedule" items={data.schedule} />
-              <ScheduleSection title="Optimized Timeline" items={data.optimized_schedule} />
-=======
             <ScheduleMap items={data.optimized_schedule} />
             <div className="grid gap-6 md:grid-cols-2">
               <ScheduleSection title="Original Schedule" items={data.schedule} />
@@ -207,7 +194,6 @@ export default async function Home() {
                 title="Optimized Timeline"
                 items={data.optimized_schedule}
               />
->>>>>>> 5a1bfb6 (scheduling algorithm)
               <TodoBoard title="Todo Backlog" todos={data.todos} />
               <RemainingTodoSection todos={data.remaining_todos} />
             </div>
