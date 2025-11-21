@@ -175,25 +175,51 @@ def _normalize_course_header(raw_header: str) -> Tuple[str, str | None, str | No
 
 
 def format_course_label(raw_course: str) -> str:
+    """Format course label in a clean format: [Course Code] Course Title"""
     title, course_code, _ = _normalize_course_header(raw_course)
-    parts = [title]
+    parts = []
     if course_code:
-        parts.append(f"({course_code})")
-    return " ".join(part for part in parts if part).strip()
+        parts.append(f"[{course_code}]")
+    if title and title.strip():
+        parts.append(title.strip())
+    return " ".join(parts).strip() if parts else "과목"
 
 
 def format_task_label(raw_course: str, task_title: str) -> str:
+    """
+    Format task label in a clean, readable format.
+    
+    Format: [Course Code] Course Title: Task Title
+    Or if no course code: Course Title: Task Title
+    """
     title, course_code, instructor = _normalize_course_header(raw_course)
-    parts = [title]
+    
+    # Build course part
+    course_parts = []
     if course_code:
-        parts.append(f"({course_code})")
-    formatted = " ".join(part for part in parts if part)
-
-    body = task_title.strip()
-    if body:
-        formatted = f"{formatted} · {body}"
-    if instructor:
-        formatted = f"{formatted} — {instructor}"
+        course_parts.append(f"[{course_code}]")
+    if title and title.strip():
+        course_parts.append(title.strip())
+    
+    course_str = " ".join(course_parts).strip()
+    
+    # Build task part
+    body = task_title.strip() if task_title else ""
+    
+    # Combine: Course: Task
+    if course_str and body:
+        formatted = f"{course_str}: {body}"
+    elif course_str:
+        formatted = course_str
+    elif body:
+        formatted = body
+    else:
+        formatted = "과제"
+    
+    # Add instructor in parentheses if present
+    if instructor and instructor.strip():
+        formatted = f"{formatted} ({instructor.strip()})"
+    
     return formatted
 
 
