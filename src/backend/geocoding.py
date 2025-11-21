@@ -4,7 +4,8 @@ Uses Naver Maps Geocoding API
 """
 
 import requests
-from config import Config
+
+from backend.config import Config
 
 
 def get_location_coords(address):

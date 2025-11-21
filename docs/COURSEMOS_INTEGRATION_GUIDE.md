@@ -336,8 +336,8 @@ class Config:
 ### main.py에서 사용
 
 ```python
-from config import Config
-from coursemos_crawler import CoursemosCrawler
+from backend.config import Config
+from backend.coursemos_crawler import CoursemosCrawler
 
 def run_with_crawler():
     Config.validate()
@@ -403,9 +403,9 @@ def fetch_assignments(self):
 ### 완전한 통합 예제
 
 ```python
-from config import Config
-from coursemos_crawler import CoursemosCrawler
-from scheduler import allocate_tasks, print_schedule
+from backend.config import Config
+from backend.coursemos_crawler import CoursemosCrawler
+from backend.scheduler import allocate_tasks, print_schedule
 
 def main():
     # 1. 환경 설정 확인

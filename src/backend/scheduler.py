@@ -4,8 +4,8 @@ Calculates free time between schedule items considering travel time
 """
 
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional
-from directions import get_travel_time_from_addresses
+from typing import Dict, List, Optional, Tuple
+from backend.directions import get_travel_time_from_addresses
 
 
 def parse_time(time_str):
@@ -75,7 +75,11 @@ def calculate_free_time(schedule_item_1, schedule_item_2):
     }
 
 
-def allocate_tasks(schedule: List[Dict], todo_list: List[Dict]) -> List[Dict]:
+def allocate_tasks(
+    schedule: List[Dict],
+    todo_list: List[Dict],
+    return_summary: bool = False,
+) -> List[Dict] | Tuple[List[Dict], List[Dict]]:
     """
     Allocate tasks from todo_list to free time slots in schedule
     
@@ -141,6 +145,8 @@ def allocate_tasks(schedule: List[Dict], todo_list: List[Dict]) -> List[Dict]:
         for task in remaining_tasks:
             print(f"   - {task['task']} ({task['estimated_time']}분)")
     
+    if return_summary:
+        return optimized_schedule, remaining_tasks
     return optimized_schedule
 
 
@@ -210,7 +216,7 @@ def test_scheduler():
 
 
 if __name__ == "__main__":
-    from config import Config
+    from backend.config import Config
     
     try:
         Config.validate()

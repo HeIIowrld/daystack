@@ -35,7 +35,7 @@ You'll see:
 ### Step 2: Understand the Code Structure
 
 ```python
-from coursemos_crawler import CoursemosCrawler
+from backend.coursemos_crawler import CoursemosCrawler
 
 # Initialize crawler
 crawler = CoursemosCrawler(
@@ -182,7 +182,7 @@ Create a test script:
 
 ```python
 # test_selectors.py
-from coursemos_crawler import CoursemosCrawler
+from backend.coursemos_crawler import CoursemosCrawler
 
 crawler = CoursemosCrawler(
     username="your_username",
