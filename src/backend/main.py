@@ -4,12 +4,13 @@ Automatic schedule optimization with travel time consideration
 """
 
 import sys
-from datetime import datetime
-from config import Config
-from coursemos_crawler import CoursemosCrawler
-from scheduler import allocate_tasks, print_schedule
-from geocoding import get_location_coords
-from directions import get_travel_time_from_addresses
+
+from backend.config import Config
+from backend.coursemos_crawler import CoursemosCrawler
+from backend.directions import get_travel_time_from_addresses
+from backend.geocoding import get_location_coords
+from backend.sample_data import get_sample_schedule, get_sample_todos
+from backend.scheduler import allocate_tasks, print_schedule
 
 
 def print_banner():
@@ -17,33 +18,6 @@ def print_banner():
     print("\n" + "="*60)
     print("  YCC 스케줄러 - 이동시간 고려 일정 자동 최적화")
     print("="*60 + "\n")
-
-
-def get_sample_schedule():
-    """
-    Get sample schedule for demonstration
-    In production, this would come from user's calendar or database
-    """
-    return [
-        {
-            "name": "오전 수업",
-            "start_time": "09:00",
-            "end_time": "12:00",
-            "location": "강남역"
-        },
-        {
-            "name": "점심 약속",
-            "start_time": "12:30",
-            "end_time": "13:30",
-            "location": "강남역"
-        },
-        {
-            "name": "아르바이트",
-            "start_time": "16:00",
-            "end_time": "20:00",
-            "location": "판교역"
-        }
-    ]
 
 
 def get_manual_todos():
@@ -77,11 +51,7 @@ def get_manual_todos():
         return todos
     else:
         # Return sample data
-        return [
-            {"task": "온라인 강의 듣기", "estimated_time": 40},
-            {"task": "영어 과제", "estimated_time": 30},
-            {"task": "독서", "estimated_time": 45}
-        ]
+        return get_sample_todos()
 
 
 def run_with_crawler():

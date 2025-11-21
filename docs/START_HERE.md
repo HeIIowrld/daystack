@@ -67,6 +67,24 @@ The scheduler will:
 3. ✅ Automatically allocate tasks
 4. ✅ Display optimized schedule
 
+## Step 6: Launch the Frontend (Optional UI)
+
+```bash
+cd src/frontend
+npm install   # first time only
+npm run dev
+```
+
+Visit `http://localhost:3000` to see the React UI. When exposing backend APIs, set up a rewrite/proxy in `next.config.ts` so browser calls hit your local Python services without CORS issues.
+
+## Step 7: Start the FastAPI backend
+
+```bash
+python -m uvicorn backend.api:app --reload --app-dir src
+```
+
+This serves the scheduler API at `http://localhost:8000/api`, which the frontend uses for data.
+
 ---
 
 ## What Next?

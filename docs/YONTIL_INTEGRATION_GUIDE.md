@@ -374,7 +374,7 @@ def _check_session_alive(self) -> bool:
 ### Basic Usage
 
 ```python
-from coursemos_crawler import CoursemosCrawler
+from backend.coursemos_crawler import CoursemosCrawler
 
 # Create crawler instance
 crawler = CoursemosCrawler(
@@ -407,8 +407,8 @@ with CoursemosCrawler(username="user", password="pass") as crawler:
 ### Integration with Scheduler
 
 ```python
-from coursemos_crawler import CoursemosCrawler
-from scheduler import allocate_tasks, print_schedule
+from backend.coursemos_crawler import CoursemosCrawler
+from backend.scheduler import allocate_tasks, print_schedule
 
 # Fetch assignments from Coursemos
 crawler = CoursemosCrawler(username="user", password="pass")

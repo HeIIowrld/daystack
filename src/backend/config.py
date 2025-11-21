@@ -15,6 +15,8 @@ class Config:
     # Naver API Credentials
     NAVER_CLIENT_ID = os.getenv('NAVER_CLIENT_ID')
     NAVER_CLIENT_SECRET = os.getenv('NAVER_CLIENT_SECRET')
+    LOC_CLIENT_ID = os.getenv('LOC_CLIENT_ID')
+    LOC_CLIENT_SECRET = os.getenv('LOC_CLIENT_SECRET')
     
     # Travel time buffer (in minutes) - adds safety margin to travel time estimates
     TRAVEL_TIME_BUFFER = int(os.getenv('TRAVEL_TIME_BUFFER', 15))
@@ -40,4 +42,5 @@ class Config:
     def resolve_location(cls, location):
         """Resolve location aliases to full addresses"""
         return cls.LOCATION_ALIASES.get(location, location)
+
 
