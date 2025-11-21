@@ -173,6 +173,12 @@ Next.js의 API Route 또는 `next.config.ts` rewrites를 통해 `localhost` 로�
 - 백엔드가 주소를 좌표로 변환해야 하므로 `.env`에 NAVER Geocoding API 키를 반드시 설정하세요.
 - FastAPI가 실행 중이면 `GET /api/sample` 및 프론트엔드 대시보드에서 자동으로 지도에 경로가 표시됩니다.
 
+### 🗺️ 지도 시각화
+
+- 프론트엔드는 `react-leaflet`을 사용하여 일정 이동 경로를 시각화합니다.
+- 백엔드가 주소를 좌표로 변환해야 하므로 `.env`에 NAVER Geocoding API 키를 반드시 설정하세요.
+- FastAPI가 실행 중이면 `GET /api/sample` 및 프론트엔드 대시보드에서 자동으로 지도에 경로가 표시됩니다.
+
 ## 🧠 백엔드 API 서버
 
 FastAPI 서버는 스케줄러 결과를 HTTP로 노출합니다.
@@ -185,6 +191,19 @@ python -m uvicorn backend.api:app --reload --app-dir src
 - 기본 포트: `http://localhost:8000`
 - 모든 엔드포인트는 `/api` 아래에서 제공됩니다. (예: `GET /api/sample`)
 - 프론트엔드에서는 `NEXT_PUBLIC_API_BASE_URL` 환경 변수를 사용해 API 주소를 바꿀 수 있습니다. (기본값: `http://localhost:8000/api`)
+
+## 🎮 DAYSTACK CLI
+
+CLI 메인 로직(`daystack.py`)은 FastAPI/Next.js와 동일한 컨트롤러를 사용합니다.
+
+```bash
+python daystack.py
+```
+
+- 옵션 1: Coursemos 크롤러(모의 데이터)에서 과제 가져오기
+- 옵션 2: 직접 할 일과 예상 시간을 입력
+
+CLI에서 사용하는 일정/과제 정보는 `GET /api/sample`에도 동일하게 반영되어 프론트엔드에서 시각화됩니다.
 
 ## 🎮 DAYSTACK CLI
 
