@@ -53,17 +53,101 @@ def manual_input_tasks():
     
     return tasks
 
+def parse_course_id(course_name):
+    """
+    Parse course ID from course name (format: AAA0000.00-00)
+    Returns 3-letter college code (e.g., 'CSE' from 'CSE1234.01-01')
+    """
+    import re
+    # Pattern: 3 letters, 4 digits, dot, 2 digits, dash, 2 digits
+    pattern = r'^([A-Z]{3})\d{4}\.\d{2}-\d{2}'
+    match = re.match(pattern, course_name)
+    if match:
+        return match.group(1)
+    return None
+
+
+def get_college_location(college_code):
+    """
+    Map college code to building location.
+    If not found, return default location.
+    """
+    # College code to building location mapping
+    college_locations = {
+        "KOR": "연세대학교 위당관",
+        "CHI": "연세대학교 위당관",
+        "CHN": "연세대학교 위당관",
+        "ENG": "연세대학교 위당관",
+        "GER": "연세대학교 위당관",
+        "FRA": "연세대학교 위당관",
+        "RUS": "연세대학교 위당관",
+        "HIS": "연세대학교 위당관",
+        "PHI": "연세대학교 위당관",
+        "LLI": "연세대학교 위당관",
+        "PSY": "연세대학교 위당관",
+        "CBE": "연세대학교 공학관",
+        "EEE": "연세대학교 공학관",
+        "ARC": "연세대학교 공학관",
+        "CEE": "연세대학교 공학관",
+        "MEE": "연세대학교 공학관",
+        "MSE": "연세대학교 공학관",
+        "CSI": "연세대학교 공학관",
+        "IID": "연세대학교 공학관",
+        "GLT": "연세대학교 공학관",  # Chemical Engineering
+        "MAT": "연세대학교 과학관",
+        "PHY": "연세대학교 과학관",
+        "CHE": "연세대학교 과학관",
+        "ESS": "연세대학교 과학관",
+        "AST": "연세대학교 과학관",
+        "ATM": "연세대학교 과학관",
+        "ECO": "연세대학교 대우관",
+        "STA": "연세대학교 대우관",
+        "BIZ": "연세대학교 경영관",
+        "POL": "연세대학교 정치외교학",
+        "PUB": "연세대학교 외솔관",
+        "SOC": "연세대학교 외솔관",
+        "ANT": "연세대학교 외솔관",
+        "COM": "연세대학교 외솔관",
+        "SWK": "연세대학교 외솔관",
+        "LAW": "연세대학교 법학관",
+        "MED": "연세대학교 의과대학",
+        "DEN": "연세대학교 치과대학",
+        "NUR": "연세대학교 간호대학",
+        "PHAR": "연세대학교 약학대학",
+        "MUS": "연세대학교 음악대학",
+        "ART": "연세대학교 미술대학",
+        "THE": "연세대학교 신과대학",
+        "CNT": "연세대학교 삼성관",
+        "FNS": "연세대학교 삼성관",
+        "HID": "연세대학교 삼성관",
+        "CFM": "연세대학교 삼성관",
+        "HEC": "연세대학교 삼성관"
+    }
+    
+    if college_code and college_code in college_locations:
+        return college_locations[college_code]
+    
+    # Default location if not found
+    return "연세대학교"
+
+
 def convert_lms_tasks(lms_tasks):
     """
     Convert LMS crawler output to Scheduler format.
-    Scheduler expects: 'task' and 'estimated_time'
+    Scheduler expects: 'task', 'estimated_time', and 'location'
     """
     formatted_tasks = []
     print(f"\n📥 Converting {len(lms_tasks)} LMS tasks...")
     
     for t in lms_tasks:
+        course_name = t.get('course', '')
+        
+        # Parse course ID to get college code
+        college_code = parse_course_id(course_name)
+        location = get_college_location(college_code)
+        
         # Combine Course and Task Name for clarity
-        full_name = f"[{t['course']}] {t['task']}"
+        full_name = f"[{course_name}] {t['task']}"
         
         # Heuristic: Default to 60 mins for assignments, can be adjusted
         default_duration = 60 
@@ -71,8 +155,15 @@ def convert_lms_tasks(lms_tasks):
         formatted_tasks.append({
             "task": full_name,
             "estimated_time": default_duration,
-            "course": t.get('course', ''),
+            "course": course_name,
+            "location": location,
         })
+        
+        if college_code:
+            print(f"  ✓ {course_name} → {college_code} → {location}")
+        else:
+            print(f"  ⚠ {course_name} → (no course ID found) → {location}")
+    
     return formatted_tasks
 
 def main():

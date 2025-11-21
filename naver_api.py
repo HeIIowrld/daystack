@@ -8,12 +8,12 @@ CLIENT_SECRET = str(NAVER_CLIENT_SECRET).strip()
 
 def geocode(address):
     """Convert address to coordinates (longitude,latitude)"""
-    url = "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode"
+    url = "https://maps.apigw.ntruss.com/map-geocode/v2/geocode"
     
     # 2. Use Standard Capitalization
     headers = {
-        "X-NCP-APIGW-API-KEY-ID": CLIENT_ID,
-        "X-NCP-APIGW-API-KEY": CLIENT_SECRET,
+        "X-NCP-APIGW-API-KEY-ID": LOC_CLIENT_ID,
+        "X-NCP-APIGW-API-KEY": LOC_CLIENT_SECRET,
     }
     
     try:
@@ -42,8 +42,8 @@ def get_travel_duration(start, goal):
     
     # 2. Use Standard Capitalization here too
     headers = {
-        "X-NCP-APIGW-API-KEY-ID": CLIENT_ID,
-        "X-NCP-APIGW-API-KEY": CLIENT_SECRET,
+        "X-NCP-APIGW-API-KEY-ID": NAVER_CLIENT_ID,
+        "X-NCP-APIGW-API-KEY": NAVER_CLIENT_SECRET,
     }
     
     params = {
