@@ -187,40 +187,12 @@ def format_course_label(raw_course: str) -> str:
 
 def format_task_label(raw_course: str, task_title: str) -> str:
     """
-    Format task label in a clean, readable format.
-    
-    Format: [Course Code] Course Title: Task Title
-    Or if no course code: Course Title: Task Title
+    Format task label - returns just the task name for simplicity.
+    Course info, due date, and estimated time are stored separately.
     """
-    title, course_code, instructor = _normalize_course_header(raw_course)
-    
-    # Build course part
-    course_parts = []
-    if course_code:
-        course_parts.append(f"[{course_code}]")
-    if title and title.strip():
-        course_parts.append(title.strip())
-    
-    course_str = " ".join(course_parts).strip()
-    
-    # Build task part
-    body = task_title.strip() if task_title else ""
-    
-    # Combine: Course: Task
-    if course_str and body:
-        formatted = f"{course_str}: {body}"
-    elif course_str:
-        formatted = course_str
-    elif body:
-        formatted = body
-    else:
-        formatted = "과제"
-    
-    # Add instructor in parentheses if present
-    if instructor and instructor.strip():
-        formatted = f"{formatted} ({instructor.strip()})"
-    
-    return formatted
+    # Just return the task title, cleaned up
+    task_name = task_title.strip() if task_title else "과제"
+    return task_name
 
 
 def estimate_task_time(task_title: str) -> int:
@@ -266,19 +238,28 @@ def convert_lms_tasks(lms_tasks):
         course_name = t.get('course', '')
         location = resolve_course_location(course_name)
         
-        # Combine Course and Task Name for clarity
-        full_name = format_task_label(course_name, t['task'])
+        # Just use the task name (no course info in task name)
+        task_name = format_task_label(course_name, t['task'])
         course_label = format_course_label(course_name)
         
         # Smart time estimation based on task title keywords
         estimated_time = estimate_task_time(t['task'])
         
+        # Extract due date if available
+        due_date = t.get('due_date', '')
+        
+        # Extract due date if available (crawler uses 'due_date')
+        due_date = t.get('due_date', '')
+        # Clean up "No deadline" to None
+        deadline = due_date if due_date and due_date != "No deadline" else None
+        
         formatted_tasks.append({
-            "task": full_name,
-            "estimated_time": estimated_time,
-            "course": course_name,
-            "course_display": course_label,
+            "task": task_name,  # Just the task name (e.g., "11/3 presentation ppt")
+            "estimated_time": estimated_time,  # Expected time in minutes
+            "course": course_name,  # Full course name for reference
+            "course_display": course_label,  # Formatted course name for display
             "location": location,
+            "deadline": deadline,  # Due date stored separately
         })
         
         college_code = parse_course_id(course_name)

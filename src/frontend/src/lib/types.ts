@@ -19,6 +19,7 @@ export type TodoItem = {
   deadline?: string;
   course?: string;
   course_display?: string;
+  location?: string;
   link?: string;
   source?: string;
 };

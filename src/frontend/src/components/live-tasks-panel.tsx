@@ -63,7 +63,12 @@ export function LiveTasksPanel() {
             {data.tasks.map((task) => (
               <li key={`${task.task}-${task.course}`} className="rounded-xl border border-zinc-100 bg-zinc-50 px-4 py-3 text-sm">
                 <p className="font-semibold text-zinc-900">{task.task}</p>
-                <p className="text-zinc-500">{task.location ?? '위치 미정'} · {task.estimated_time}분</p>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                  {task.course_display && <span>{task.course_display}</span>}
+                  {task.deadline && <span>· Due: {task.deadline}</span>}
+                  <span>· {task.estimated_time}분</span>
+                  {task.location && <span>· {task.location}</span>}
+                </div>
               </li>
             ))}
           </ul>

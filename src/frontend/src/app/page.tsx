@@ -81,18 +81,18 @@ function TodoBoard({
             key={todo.task}
             className="rounded-xl border border-zinc-100 bg-zinc-50/60 px-4 py-3 text-zinc-900"
           >
-            <div>
+            <div className="flex-1">
               <p className="font-medium">{todo.task}</p>
-              {todo.course_display ? (
-                <p className="text-xs text-zinc-500">{todo.course_display}</p>
-              ) : null}
-              {!todo.course_display && todo.location ? (
-                <p className="text-xs text-zinc-500">{todo.location}</p>
-              ) : null}
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                {todo.course_display && (
+                  <span>{todo.course_display}</span>
+                )}
+                {todo.deadline && (
+                  <span>· Due: {todo.deadline}</span>
+                )}
+                <span>· {todo.estimated_time}분</span>
+              </div>
             </div>
-            <span className="text-sm font-semibold">
-              {todo.estimated_time} min
-            </span>
           </li>
         ))}
       </ul>
