@@ -12,82 +12,66 @@ pip install -r requirements.txt
 cp env.example .env
 # Edit .env with your Naver Cloud Platform API keys
 
-# 3. Check configuration
-python check_api.py
+# 3. Enable APIs (IMPORTANT!)
+# Go to https://console.ncloud.com/
+# AI·NAVER API > Your Application
+# Enable BOTH:
+#   ✅ Geocoding (Map Geocoding)
+#   ✅ Directions 5 (Map Directions 5)
 
-# 4. Run
+# 4. Test
+python test_directions_only.py  # Test with coordinates
+python check_api.py             # Full test
+
+# 5. Run
 python daystack.py
 ```
 
-## 📋 Requirements
+## ⚠️ IMPORTANT: Enable Both APIs
 
-- Python 3.8+
-- Naver Cloud Platform account (free tier available)
-- API keys for: Maps Geocoding, Directions 5
+Your curl worked because **Directions API is enabled**. But you also need **Geocoding API**:
 
-## 🔧 Getting Naver API Keys
+1. Go to [Naver Cloud Console](https://console.ncloud.com/)
+2. Navigate to: `AI·NAVER API > Application > (Your App)`
+3. Scroll to "서비스 선택" (Service Selection)
+4. **Check BOTH boxes:**
+   - ✅ **Geocoding** - Map Geocoding
+   - ✅ **Directions 5** - Map Directions 5
+5. Click "수정" (Modify) to save
+6. Wait 1-2 minutes
+7. Run: `python check_api.py`
 
-1. Go to [Naver Cloud Platform](https://console.ncloud.com/)
-2. Navigate to: `AI·NAVER API > Application`
-3. Create new application
-4. **Important:** Enable these APIs:
-   - ✅ Maps - Web Dynamic Map
-   - ✅ Geocoding - Map Geocoding  
-   - ✅ Directions 5 - Map Directions 5
-5. Copy Client ID and Client Secret to `.env` file
+## 🐛 Troubleshooting
 
-## 🐛 Troubleshooting 401 Error
+**Directions works but Geocoding fails (401)?**
+→ You enabled Directions but not Geocoding. Follow steps above.
 
-**Error:** `Permission Denied - A subscription to the API is required`
-
-**Solution:**
+**Want to test without Geocoding?**
 ```bash
-# Run the diagnostic tool
-python check_api.py
+python test_directions_only.py  # Uses hardcoded coordinates
 ```
-
-This checks:
-- ✅ .env file exists
-- ✅ API keys loaded correctly
-- ✅ Geocoding API enabled
-- ✅ Directions API enabled
-
-**Common fixes:**
-1. Make sure you **enabled** the APIs in Naver Cloud Console (not just created the application)
-2. Check API keys are correct (no typos)
-3. Wait 1-2 minutes after enabling APIs
-
-See [SETUP.md](SETUP.md) for detailed troubleshooting.
 
 ## 📁 Files
 
 - `daystack.py` - Main application
-- `scheduler.py` - Task allocation algorithm
-- `naver_api.py` - Naver Maps API wrapper (uses only `duration` field)
-- `crawler.py` - LMS crawler (yontil-main patterns)
-- `check_api.py` - Diagnostic tool for API issues
-- `config.py` - Configuration loader
+- `scheduler.py` - Task allocation
+- `naver_api.py` - API wrapper (fixed URLs: maps.apigw.ntruss.com)
+- `crawler.py` - LMS crawler
+- `check_api.py` - Diagnostic tool
+- `test_directions_only.py` - Test directions without geocoding
 
 ## 💻 Usage
 
 ```bash
-# Full app
-python daystack.py
-
-# Test individual modules
-python naver_api.py    # Test API
-python scheduler.py    # Test algorithm
-python crawler.py      # Test LMS crawler
+python daystack.py              # Full app
+python naver_api.py             # Test both APIs
+python test_directions_only.py  # Test directions only
+python check_api.py             # Diagnose issues
 ```
 
 ## 🎓 LMS Integration
 
-Based on **yontil-main** patterns:
-- Multi-step login with CSRF token extraction
-- Course → Tasks hierarchy
-- Incomplete task filtering
-
-See [SETUP.md](SETUP.md) for LMS customization guide.
+Based on **yontil-main** patterns. See [SETUP.md](SETUP.md) for customization.
 
 ## 📄 License
 

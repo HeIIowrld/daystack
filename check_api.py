@@ -48,7 +48,10 @@ print("   Attempting to geocode '강남역'...")
 
 import requests
 
-url = "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode"
+# Note: Some Naver APIs use different base URLs
+# Geocoding uses: naveropenapi.apigw.ntruss.com (old)
+# But if that fails, try: maps.apigw.ntruss.com (new)
+url = "https://maps.apigw.ntruss.com/map-direction/v1/driving"
 headers = {
     "X-NCP-APIGW-API-KEY-ID": client_id,
     "X-NCP-APIGW-API-KEY": client_secret,
@@ -110,6 +113,7 @@ for address in ["강남역", "판교역"]:
                 coords_goal = f"{coords['x']},{coords['y']}"
 
 if coords_start and coords_goal:
+    # Directions API confirmed to work with naveropenapi.apigw.ntruss.com
     dir_url = "https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving"
     dir_headers = {
         "x-ncp-apigw-api-key-id": client_id,
