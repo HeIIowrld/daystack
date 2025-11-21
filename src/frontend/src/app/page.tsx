@@ -1,3 +1,6 @@
+import Image from "next/image";
+
+import { MapView } from "@/components/map-view";
 import { fetchSampleData } from "@/lib/api";
 import { OptimizeResponse, ScheduleItem, TodoItem } from "@/lib/types";
 
@@ -127,16 +130,26 @@ export default async function Home() {
     <div className="min-h-screen bg-zinc-50 py-10 font-sans text-zinc-900">
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6">
         <header className="rounded-3xl border border-zinc-200 bg-white px-8 py-10 shadow-md">
-          <p className="text-sm uppercase tracking-[0.3em] text-emerald-600">
-            YCC Scheduler
-          </p>
+          <div className="flex flex-wrap items-center gap-4">
+            <Image
+              src="/daystack-logo.svg"
+              alt="DAYSTACK logo"
+              width={160}
+              height={40}
+              priority
+              unoptimized
+            />
+            <p className="text-sm uppercase tracking-[0.3em] text-emerald-600">
+              Travel-Time Optimizer
+            </p>
+          </div>
           <h1 className="mt-4 text-4xl font-semibold text-zinc-900">
             이동 시간을 고려한 일정 최적화
           </h1>
           <p className="mt-3 max-w-3xl text-lg text-zinc-600">
-            백엔드 API에서 샘플 데이터를 가져와 스케줄과 할 일을 시각화합니다.
-            FastAPI 서버가 실행 중이면 실시간 데이터를 확인하고, 추후에는
-            직접 일정을 제출하여 최적화할 수 있습니다.
+            DAYSTACK 메인 컨트롤러의 스케줄/과제 데이터를 FastAPI 백엔드에서
+            가져와 시각화합니다. 백엔드가 Coursemos 크롤러를 통해 과제를 모으고
+            스케줄러에 전달하면, 이 페이지는 결과를 즉시 보여줍니다.
           </p>
           <div className="mt-6 flex flex-wrap gap-4 text-sm text-zinc-500">
             <span className="rounded-full bg-zinc-100 px-4 py-1">
@@ -166,12 +179,15 @@ export default async function Home() {
             </p>
           </section>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2">
-            <ScheduleSection title="Original Schedule" items={data.schedule} />
-            <ScheduleSection title="Optimized Timeline" items={data.optimized_schedule} />
-            <TodoBoard title="Todo Backlog" todos={data.todos} />
-            <RemainingTodoSection todos={data.remaining_todos} />
-          </div>
+          <>
+            <MapView schedule={data.optimized_schedule} />
+            <div className="grid gap-6 md:grid-cols-2">
+              <ScheduleSection title="Original Schedule" items={data.schedule} />
+              <ScheduleSection title="Optimized Timeline" items={data.optimized_schedule} />
+              <TodoBoard title="Todo Backlog" todos={data.todos} />
+              <RemainingTodoSection todos={data.remaining_todos} />
+            </div>
+          </>
         )}
       </main>
     </div>

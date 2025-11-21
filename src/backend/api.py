@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from backend.config import Config
+from backend.location_utils import ensure_coordinates
 from backend.sample_data import get_sample_schedule, get_sample_todos
 from backend.scheduler import allocate_tasks
 
@@ -24,12 +25,18 @@ def _config_ready() -> bool:
         return False
 
 
+class Coordinates(BaseModel):
+    lat: float
+    lng: float
+
+
 class ScheduleItem(BaseModel):
     name: str
     location: str | None = None
     start_time: str | None = None
     end_time: str | None = None
     type: str | None = None
+    coordinates: Coordinates | None = None
 
 
 class TodoItem(BaseModel):
@@ -110,12 +117,15 @@ def _run_optimization(
         return_summary=True,
     )
 
+    schedule_with_coords = ensure_coordinates(schedule_payload)
+    optimized_with_coords = ensure_coordinates(optimized_schedule)
+
     optimized_models = [
-        ScheduleItem(**entry) for entry in optimized_schedule
+        ScheduleItem(**entry) for entry in optimized_with_coords
     ]
 
     return OptimizeResponse(
-        schedule=schedule,
+        schedule=[ScheduleItem(**entry) for entry in schedule_with_coords],
         todos=todos,
         optimized_schedule=optimized_models,
         remaining_todos=[TodoItem(**todo) for todo in remaining],

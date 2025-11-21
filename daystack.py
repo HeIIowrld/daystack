@@ -3,6 +3,8 @@ DAYSTACK - To-do list Tetris
 Optimizing your daily tasks with travel time consideration
 """
 
+from typing import Dict, List, Tuple
+
 from scheduler import allocate_tasks, print_schedule
 from crawler import LMSCrawler
 from config import YONSEI_USERNAME, YONSEI_PASSWORD
@@ -33,7 +35,7 @@ def get_schedule():
 def manual_input_tasks():
     """Manual task input"""
     print("\n📝 Enter tasks (empty line to finish):\n")
-    tasks = []
+    tasks: List[Dict] = []
     
     while True:
         name = input("Task name: ").strip()
@@ -42,7 +44,7 @@ def manual_input_tasks():
         
         try:
             duration = int(input("Duration (minutes): ").strip())
-            tasks.append({"name": name, "duration": duration})
+            tasks.append({"task": name, "estimated_time": duration})
             print("✓ Added\n")
         except ValueError:
             print("✗ Invalid duration\n")
@@ -110,14 +112,16 @@ def main():
         print("⚠️  No tasks to schedule")
         return
     
-    # Get schedule
-    schedule = get_schedule()
-    
     print("\n📅 Today's Schedule:")
     for event in schedule:
         start = event.get('start_time', '')
         end = event.get('end_time', '')
         print(f"  {start}-{end}: {event['name']} @ {event['location']}")
+    
+    print("\n📚 Tasks:")
+    for task in tasks:
+        course = f" ({task['course']})" if task.get("course") else ""
+        print(f"  - {task['task']}{course} / {task['estimated_time']}분")
     
     # Optimize
     print("\n🔄 Optimizing...")

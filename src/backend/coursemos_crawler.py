@@ -27,7 +27,7 @@ class CoursemosCrawler:
     LOGIN_URL = f"{COURSEMOS_ORIGIN}/login"
     MAIN_PAGE_URL = f"{COURSEMOS_ORIGIN}/main"
     
-    def __init__(self, username=None, password=None, use_selenium=False):
+    def __init__(self, username=None, password=None, use_selenium=False, origin=None):
         """
         Initialize crawler with credentials
         
@@ -35,6 +35,7 @@ class CoursemosCrawler:
             username (str): Coursemos username
             password (str): Coursemos password
             use_selenium (bool): Whether to use Selenium instead of requests
+            origin (str): Optional base URL for the LMS instance
         """
         self.username = username
         self.password = password
@@ -42,6 +43,11 @@ class CoursemosCrawler:
         self.logged_in = False
         self.session = requests.Session()
         self.driver = None
+        
+        if origin:
+            self.COURSEMOS_ORIGIN = origin.rstrip("/")
+            self.LOGIN_URL = f"{self.COURSEMOS_ORIGIN}/login"
+            self.MAIN_PAGE_URL = f"{self.COURSEMOS_ORIGIN}/main"
         
         # Set headers to mimic browser
         self.session.headers.update({

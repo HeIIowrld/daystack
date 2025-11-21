@@ -1,0 +1,7 @@
+<svg width="160" height="40" viewBox="0 0 160 40" xmlns="http://www.w3.org/2000/svg">
+  <rect width="160" height="40" rx="8" fill="#0f172a"/>
+  <text x="20" y="26" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" letter-spacing="4">DAYSTACK</text>
+  <circle cx="130" cy="20" r="10" fill="#22c55e" opacity="0.8"/>
+  <path d="M124 20h12" stroke="#fafff7" stroke-width="2" stroke-linecap="round"/>
+  <path d="M130 14v12" stroke="#fafff7" stroke-width="2" stroke-linecap="round"/>
+</svg>

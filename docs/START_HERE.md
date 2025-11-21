@@ -85,6 +85,8 @@ python -m uvicorn backend.api:app --reload --app-dir src
 
 This serves the scheduler API at `http://localhost:8000/api`, which the frontend uses for data.
 
+With backend + frontend running together, the dashboard renders an interactive map (react-leaflet) that visualizes travel paths between schedule items. If markers fail to appear, re-check the NAVER geocoding keys in your `.env`.
+
 ---
 
 ## What Next?
