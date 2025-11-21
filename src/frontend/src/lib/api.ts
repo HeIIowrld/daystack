@@ -1,4 +1,9 @@
-import { OptimizeResponse, ScheduleItem, TodoItem } from "@/lib/types";
+import {
+  LiveTaskResponse,
+  OptimizeResponse,
+  ScheduleItem,
+  TodoItem,
+} from "@/lib/types";
 
 const DEFAULT_API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
@@ -42,4 +47,8 @@ export async function optimizeSchedule(payload: {
     },
     { revalidate: false },
   );
+}
+
+export async function fetchLiveTasks(): Promise<LiveTaskResponse> {
+  return request<LiveTaskResponse>('/tasks/live', undefined, { revalidate: false });
 }

@@ -16,6 +16,11 @@ from .geocoding import get_location_coords
 from .sample_data import get_sample_schedule, get_sample_todos
 from .scheduler import allocate_tasks
 
+try:
+    from daystack import get_crawler_tasks
+except Exception:
+    get_crawler_tasks = None
+
 
 def _config_ready() -> bool:
     """Return True if the required Naver credentials are configured."""
@@ -79,6 +84,12 @@ class OptimizeResponse(BaseModel):
     remaining_todos: List[TodoItem]
     meta: SchedulerMeta
     insights: ScheduleInsights
+
+
+class LiveTaskResponse(BaseModel):
+    tasks: List[TodoItem]
+    count: int
+    campus_breakdown: List[CampusBreakdown]
 
 
 app = FastAPI(
@@ -214,6 +225,40 @@ async def sample_data() -> OptimizeResponse:
 async def optimize(payload: OptimizeRequest) -> OptimizeResponse:
     """Optimize an arbitrary schedule/task payload."""
     return _run_optimization(payload.schedule, payload.todos)
+
+
+@router.get("/tasks/live", response_model=LiveTaskResponse)
+async def live_tasks() -> LiveTaskResponse:
+    """Fetch real LMS assignments using daystack crawler."""
+    if not callable(get_crawler_tasks):
+        raise HTTPException(
+            status_code=503,
+            detail="LMS crawler not available on this server.",
+        )
+
+    tasks = get_crawler_tasks()
+    if not tasks:
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch tasks from LMS.",
+        )
+
+    campus_counter = defaultdict(int)
+    todo_models = []
+    for task in tasks:
+        todo = TodoItem(**task)
+        location = todo.location or "위치 미정"
+        campus_counter[location] += 1
+        todo_models.append(todo)
+
+    return LiveTaskResponse(
+        tasks=todo_models,
+        count=len(todo_models),
+        campus_breakdown=[
+            CampusBreakdown(location=loc, count=count)
+            for loc, count in sorted(campus_counter.items())
+        ],
+    )
 
 
 app.include_router(router)

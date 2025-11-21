@@ -5,6 +5,7 @@ Optimizing your daily tasks with travel time consideration
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta
 from typing import Dict, List, Tuple
 
 from crawler import LMSCrawler
@@ -13,29 +14,36 @@ from config import YONSEI_USERNAME, YONSEI_PASSWORD
 
 DEFAULT_TASK_DURATION = 60
 
+FALLBACK_SCHEDULE = [
+    {
+        "name": "오전 수업",
+        "start_time": "09:00",
+        "end_time": "12:00",
+        "location": "강남역",
+    },
+    {
+        "name": "점심",
+        "start_time": "12:30",
+        "end_time": "13:30",
+        "location": "강남역",
+    },
+    {
+        "name": "아르바이트",
+        "start_time": "16:00",
+        "end_time": "20:00",
+        "location": "판교역",
+    },
+]
 
-def get_schedule() -> List[Dict]:
-    """Return today's sample schedule."""
-    return [
-        {
-            "name": "오전 수업",
-            "start_time": "09:00",
-            "end_time": "12:00",
-            "location": "강남역",
-        },
-        {
-            "name": "점심",
-            "start_time": "12:30",
-            "end_time": "13:30",
-            "location": "강남역",
-        },
-        {
-            "name": "아르바이트",
-            "start_time": "16:00",
-            "end_time": "20:00",
-            "location": "판교역",
-        },
-    ]
+
+def get_schedule(use_lms: bool = True) -> List[Dict]:
+    """Return today's schedule using real LMS due dates when possible."""
+    if use_lms:
+        raw_tasks = fetch_raw_lms_tasks()
+        schedule = build_schedule_from_lms(raw_tasks)
+        if schedule:
+            return schedule
+    return FALLBACK_SCHEDULE.copy()
 
 
 def manual_input_tasks() -> List[Dict]:
@@ -55,9 +63,6 @@ def manual_input_tasks() -> List[Dict]:
         except ValueError:
             print("✗ Invalid duration\n")
             continue
-
-        tasks.append({"task": name, "estimated_time": duration})
-        print("✓ Added\n")
 
     return tasks
 
@@ -139,6 +144,11 @@ def get_college_location(college_code):
     return "연세대학교"
 
 
+def resolve_course_location(course_name: str) -> str:
+    code = parse_course_id(course_name)
+    return get_college_location(code)
+
+
 def convert_lms_tasks(lms_tasks):
     """
     Convert LMS crawler output to Scheduler format.
@@ -149,10 +159,7 @@ def convert_lms_tasks(lms_tasks):
     
     for t in lms_tasks:
         course_name = t.get('course', '')
-        
-        # Parse course ID to get college code
-        college_code = parse_course_id(course_name)
-        location = get_college_location(college_code)
+        location = resolve_course_location(course_name)
         
         # Combine Course and Task Name for clarity
         full_name = f"[{course_name}] {t['task']}"
@@ -167,6 +174,7 @@ def convert_lms_tasks(lms_tasks):
             "location": location,
         })
         
+        college_code = parse_course_id(course_name)
         if college_code:
             print(f"  ✓ {course_name} → {college_code} → {location}")
         else:
@@ -175,8 +183,7 @@ def convert_lms_tasks(lms_tasks):
     return formatted_tasks
 
 
-def get_crawler_tasks(username: str | None = None, password: str | None = None) -> List[Dict]:
-    """Fetch and convert tasks from the LMS crawler."""
+def fetch_raw_lms_tasks(username: str | None = None, password: str | None = None) -> List[Dict]:
     username = username or YONSEI_USERNAME
     password = password or YONSEI_PASSWORD
 
@@ -189,17 +196,49 @@ def get_crawler_tasks(username: str | None = None, password: str | None = None) 
         print("❌ Login failed. Please check your credentials.")
         return []
 
-    raw_tasks = crawler.fetch_tasks()
+    return crawler.fetch_tasks() or []
+
+
+def get_crawler_tasks(username: str | None = None, password: str | None = None) -> List[Dict]:
+    """Fetch and convert tasks from the LMS crawler."""
+    raw_tasks = fetch_raw_lms_tasks(username, password)
     if not raw_tasks:
         print("⚠️  Login successful, but no incomplete tasks found.")
         return []
-
     return convert_lms_tasks(raw_tasks)
+
+
+def build_schedule_from_lms(raw_tasks: List[Dict]) -> List[Dict]:
+    events = []
+    for task in raw_tasks:
+        due_str = task.get("due_date")
+        if not due_str:
+            continue
+        try:
+            due_dt = datetime.strptime(due_str, "%Y-%m-%d %H:%M")
+        except ValueError:
+            continue
+
+        start_dt = due_dt - timedelta(minutes=DEFAULT_TASK_DURATION)
+        title = f"[{task.get('course', '과제')}] {task.get('task')}"
+        location = resolve_course_location(task.get("course", ""))
+
+        events.append(
+            {
+                "name": title,
+                "start_time": start_dt.strftime("%H:%M"),
+                "end_time": due_dt.strftime("%H:%M"),
+                "location": location,
+            }
+        )
+
+    return sorted(events, key=lambda e: e["start_time"])
 
 
 def get_daystack_data(source: str = "crawler") -> Tuple[List[Dict], List[Dict]]:
     """Shared helper for CLI/API to retrieve schedule and tasks."""
-    schedule = get_schedule()
+    use_lms_schedule = source == "crawler"
+    schedule = get_schedule(use_lms=use_lms_schedule)
 
     if source == "crawler":
         tasks = get_crawler_tasks()
@@ -228,9 +267,6 @@ def main():
     if not tasks:
         print("⚠️  No tasks to schedule")
         return
-    
-    # Get schedule
-    schedule = get_schedule()
     
     print("\n📅 Today's Schedule:")
     for event in schedule:
