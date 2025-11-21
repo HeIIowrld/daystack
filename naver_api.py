@@ -10,14 +10,22 @@ def geocode(address):
         "X-NCP-APIGW-API-KEY-ID": NAVER_CLIENT_ID,
         "X-NCP-APIGW-API-KEY": NAVER_CLIENT_SECRET,
     }
-    response = requests.get(url, headers=headers, params={"query": address})
     
-    if response.status_code == 200:
-        data = response.json()
-        if data.get('addresses'):
-            x = data['addresses'][0]['x']
-            y = data['addresses'][0]['y']
-            return f"{x},{y}"
+    try:
+        response = requests.get(url, headers=headers, params={"query": address})
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('addresses'):
+                x = data['addresses'][0]['x']
+                y = data['addresses'][0]['y']
+                return f"{x},{y}"
+        else:
+            print(f"Geocoding Error: API returned status code {response.status_code}")
+            print(f"Response: {response.text}")
+    except Exception as e:
+        print(f"Geocoding Exception: {e}")
+    
     return None
 
 
@@ -32,6 +40,7 @@ def get_travel_duration(start, goal):
     Returns:
         int: Duration in minutes (including buffer)
     """
+    # Use the correct endpoint: maps.apigw.ntruss.com
     url = "https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving"
     headers = {
         "x-ncp-apigw-api-key-id": NAVER_CLIENT_ID,
@@ -42,14 +51,20 @@ def get_travel_duration(start, goal):
         "goal": goal,
     }
     
-    response = requests.get(url, headers=headers, params=params)
-    
-    if response.status_code == 200:
-        data = response.json()
-        # Extract duration from traoptimal route
-        duration_ms = data['route']['traoptimal'][0]['summary']['duration']
-        duration_min = int(duration_ms / 1000 / 60)
-        return duration_min + TRAVEL_TIME_BUFFER
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        
+        if response.status_code == 200:
+            data = response.json()
+            # Extract duration from traoptimal route
+            duration_ms = data['route']['traoptimal'][0]['summary']['duration']
+            duration_min = int(duration_ms / 1000 / 60)
+            return duration_min + TRAVEL_TIME_BUFFER
+        else:
+            print(f"Directions Error: API returned status code {response.status_code}")
+            print(f"Response: {response.text}")
+    except Exception as e:
+        print(f"Directions Exception: {e}")
     
     return 0
 

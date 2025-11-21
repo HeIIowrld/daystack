@@ -5,11 +5,18 @@
 1. Go to [Naver Cloud Platform](https://www.ncloud.com/)
 2. Sign up or log in
 3. Navigate to: `AI·NAVER API > Application`
-4. Create new application
-5. Enable these APIs:
-   - ✅ Geocoding
-   - ✅ Directions
-6. Copy your Client ID and Client Secret
+4. Click **"애플리케이션 등록"** (Register Application)
+5. Fill in application name (e.g., "daystack")
+6. Click **"등록"** (Register)
+7. **IMPORTANT:** Enable these APIs (check the boxes):
+   - ✅ **Maps** - Web Dynamic Map
+   - ✅ **Geocoding** - Map Geocoding
+   - ✅ **Directions 5** - Map Directions 5
+8. Copy your:
+   - **Client ID** (인증 정보 > Client ID)
+   - **Client Secret** (인증 정보 > Client Secret)
+
+⚠️ **Common Issue:** If you get "Permission Denied" error, make sure you checked ALL the API boxes in step 7!
 
 ## 2. Configure Environment
 
@@ -32,14 +39,44 @@ pip install -r requirements.txt
 ## 4. Test
 
 ```bash
-# Test Naver API connection
-python naver_api.py
+# Run diagnostic checker
+python check_api.py
 
-# Expected output:
-# Testing Naver API...
-# 강남역 coordinates: 127.027926,37.497952
-# 강남역 → 판교역: 55분
+# This will check:
+# 1. .env file exists
+# 2. API keys are loaded
+# 3. Geocoding API works
+# 4. Directions API works
+
+# If all checks pass, you'll see:
+# ✅ ALL CHECKS PASSED!
 ```
+
+### Troubleshooting 401 Error
+
+If you get **"Error 401: Permission Denied"**:
+
+1. **Check API keys are correct:**
+   ```bash
+   cat .env  # On Linux/Mac
+   type .env # On Windows
+   ```
+   Make sure keys match those in Naver Cloud Console
+
+2. **Enable APIs in Naver Cloud:**
+   - Go to https://console.ncloud.com/
+   - Navigate to: AI·NAVER API > Application
+   - Click your application name
+   - Scroll down to **"서비스 선택"** (Service Selection)
+   - Make sure these are **checked**:
+     - ✅ Maps - Web Dynamic Map
+     - ✅ Geocoding - Map Geocoding
+     - ✅ Directions 5 - Map Directions 5
+   - Click **"수정"** (Modify) to save
+
+3. **Wait a few minutes:**
+   - API activation can take 1-2 minutes
+   - Try again after waiting
 
 ## 5. Run
 
