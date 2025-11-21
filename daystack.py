@@ -174,6 +174,14 @@ def _normalize_course_header(raw_header: str) -> Tuple[str, str | None, str | No
     return header, course_code, instructor
 
 
+def format_course_label(raw_course: str) -> str:
+    title, course_code, _ = _normalize_course_header(raw_course)
+    parts = [title]
+    if course_code:
+        parts.append(f"({course_code})")
+    return " ".join(part for part in parts if part).strip()
+
+
 def format_task_label(raw_course: str, task_title: str) -> str:
     title, course_code, instructor = _normalize_course_header(raw_course)
     parts = [title]
@@ -234,6 +242,7 @@ def convert_lms_tasks(lms_tasks):
         
         # Combine Course and Task Name for clarity
         full_name = format_task_label(course_name, t['task'])
+        course_label = format_course_label(course_name)
         
         # Smart time estimation based on task title keywords
         estimated_time = estimate_task_time(t['task'])
@@ -242,6 +251,7 @@ def convert_lms_tasks(lms_tasks):
             "task": full_name,
             "estimated_time": estimated_time,
             "course": course_name,
+            "course_display": course_label,
             "location": location,
         })
         

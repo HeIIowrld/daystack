@@ -58,6 +58,7 @@ class TodoItem(BaseModel):
     location: Optional[str] = None
     deadline: Optional[str] = None
     course: Optional[str] = None
+    course_display: Optional[str] = None
     link: Optional[str] = None
     source: Optional[str] = None
 
