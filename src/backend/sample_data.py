@@ -5,11 +5,19 @@ Includes locations so routing logic can demonstrate travel-aware packing.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 from typing import Dict, List
+
+# Add project root to path to import daystack
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 try:
     from daystack import get_crawler_tasks, get_schedule
-except Exception:
+except Exception as e:
+    # If import fails, set to None and use fallback data
     get_crawler_tasks = None
     get_schedule = None
 
@@ -63,8 +71,11 @@ def get_sample_todos() -> List[Dict]:
     if callable(get_crawler_tasks):
         try:
             tasks = get_crawler_tasks()
-        except Exception:
+            # Only return tasks if we got actual data (non-empty list)
+            if tasks and len(tasks) > 0:
+                return tasks
+        except Exception as e:
+            # Log the error for debugging, but continue to fallback
+            print(f"⚠️  Error fetching crawler tasks: {e}")
             tasks = None
-        if tasks:
-            return tasks
     return FALLBACK_TASKS.copy()
