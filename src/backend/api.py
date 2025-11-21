@@ -286,11 +286,32 @@ async def live_tasks() -> LiveTaskResponse:
 @router.get("/schedule", response_model=List[ScheduleItem])
 async def get_schedule() -> List[ScheduleItem]:
     """Get all schedule items."""
-    # If store is empty, return sample schedule
-    if not _schedule_store:
-        sample = get_sample_schedule()
-        return [ScheduleItem(**item) for item in sample]
-    return [ScheduleItem(**item) for item in _schedule_store]
+    try:
+        # If store is empty, return sample schedule with IDs
+        if not _schedule_store:
+            sample = get_sample_schedule()
+            schedule_items = []
+            for item in sample:
+                item_dict = dict(item)
+                # Ensure ID is present
+                if "id" not in item_dict:
+                    item_dict["id"] = str(uuid.uuid4())
+                # Ensure all required fields are present
+                if "name" not in item_dict:
+                    continue  # Skip invalid items
+                try:
+                    schedule_items.append(ScheduleItem(**item_dict))
+                except Exception as e:
+                    print(f"Warning: Skipping invalid schedule item: {e}")
+                    continue
+            return schedule_items
+        return [ScheduleItem(**item) for item in _schedule_store]
+    except Exception as e:
+        # Log error and return empty list instead of crashing
+        print(f"Error in get_schedule: {e}")
+        import traceback
+        traceback.print_exc()
+        return []
 
 
 @router.post("/schedule", response_model=ScheduleItem)
@@ -300,23 +321,44 @@ async def add_schedule_item(item: ScheduleItem) -> ScheduleItem:
     if not item.id:
         item.id = str(uuid.uuid4())
     
-    # Validate time format
-    if item.start_time:
+    # Validate time format (only if provided and not empty)
+    if item.start_time and item.start_time.strip():
         try:
-            datetime.strptime(item.start_time, "%H:%M")
+            # Handle both "HH:MM" and "HH:MM:SS" formats
+            time_str = item.start_time.strip()
+            if len(time_str) == 5:  # HH:MM
+                datetime.strptime(time_str, "%H:%M")
+            elif len(time_str) == 8:  # HH:MM:SS
+                datetime.strptime(time_str, "%H:%M:%S")
+            else:
+                raise ValueError("Invalid time format")
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid start_time format. Use HH:MM")
+    else:
+        item.start_time = None
     
-    if item.end_time:
+    if item.end_time and item.end_time.strip():
         try:
-            datetime.strptime(item.end_time, "%H:%M")
+            # Handle both "HH:MM" and "HH:MM:SS" formats
+            time_str = item.end_time.strip()
+            if len(time_str) == 5:  # HH:MM
+                datetime.strptime(time_str, "%H:%M")
+            elif len(time_str) == 8:  # HH:MM:SS
+                datetime.strptime(time_str, "%H:%M:%S")
+            else:
+                raise ValueError("Invalid time format")
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid end_time format. Use HH:MM")
+    else:
+        item.end_time = None
     
-    # Validate time order
+    # Validate time order (only if both are provided)
     if item.start_time and item.end_time:
-        start = datetime.strptime(item.start_time, "%H:%M")
-        end = datetime.strptime(item.end_time, "%H:%M")
+        # Normalize to HH:MM format for comparison
+        start_str = item.start_time[:5] if len(item.start_time) >= 5 else item.start_time
+        end_str = item.end_time[:5] if len(item.end_time) >= 5 else item.end_time
+        start = datetime.strptime(start_str, "%H:%M")
+        end = datetime.strptime(end_str, "%H:%M")
         if end <= start:
             raise HTTPException(status_code=400, detail="end_time must be after start_time")
     
@@ -342,23 +384,44 @@ async def update_schedule_item(item_id: str, item: ScheduleItem) -> ScheduleItem
     if index is None:
         raise HTTPException(status_code=404, detail="Schedule item not found")
     
-    # Validate time format
-    if item.start_time:
+    # Validate time format (only if provided and not empty)
+    if item.start_time and item.start_time.strip():
         try:
-            datetime.strptime(item.start_time, "%H:%M")
+            # Handle both "HH:MM" and "HH:MM:SS" formats
+            time_str = item.start_time.strip()
+            if len(time_str) == 5:  # HH:MM
+                datetime.strptime(time_str, "%H:%M")
+            elif len(time_str) == 8:  # HH:MM:SS
+                datetime.strptime(time_str, "%H:%M:%S")
+            else:
+                raise ValueError("Invalid time format")
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid start_time format. Use HH:MM")
+    else:
+        item.start_time = None
     
-    if item.end_time:
+    if item.end_time and item.end_time.strip():
         try:
-            datetime.strptime(item.end_time, "%H:%M")
+            # Handle both "HH:MM" and "HH:MM:SS" formats
+            time_str = item.end_time.strip()
+            if len(time_str) == 5:  # HH:MM
+                datetime.strptime(time_str, "%H:%M")
+            elif len(time_str) == 8:  # HH:MM:SS
+                datetime.strptime(time_str, "%H:%M:%S")
+            else:
+                raise ValueError("Invalid time format")
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid end_time format. Use HH:MM")
+    else:
+        item.end_time = None
     
-    # Validate time order
+    # Validate time order (only if both are provided)
     if item.start_time and item.end_time:
-        start = datetime.strptime(item.start_time, "%H:%M")
-        end = datetime.strptime(item.end_time, "%H:%M")
+        # Normalize to HH:MM format for comparison
+        start_str = item.start_time[:5] if len(item.start_time) >= 5 else item.start_time
+        end_str = item.end_time[:5] if len(item.end_time) >= 5 else item.end_time
+        start = datetime.strptime(start_str, "%H:%M")
+        end = datetime.strptime(end_str, "%H:%M")
         if end <= start:
             raise HTTPException(status_code=400, detail="end_time must be after start_time")
     

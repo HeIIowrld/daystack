@@ -14,21 +14,33 @@ async function request<T>(
   options?: { revalidate?: number | false },
 ): Promise<T> {
   const url = `${DEFAULT_API_BASE_URL}${path}`;
-  const response = await fetch(url, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
-    cache: options?.revalidate === false ? "no-store" : undefined,
-  });
+  
+  try {
+    const response = await fetch(url, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...(init?.headers ?? {}),
+      },
+      cache: options?.revalidate === false ? "no-store" : undefined,
+    });
 
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(`API request failed (${response.status}): ${detail}`);
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(`API request failed (${response.status}): ${detail}`);
+    }
+
+    return await response.json();
+  } catch (error: any) {
+    // Handle network errors
+    if (error.name === "TypeError" && error.message.includes("fetch")) {
+      throw new Error(
+        `Network error: Cannot connect to API at ${url}. ` +
+        `Please ensure the FastAPI server is running at ${DEFAULT_API_BASE_URL.replace("/api", "")}`
+      );
+    }
+    throw error;
   }
-
-  return await response.json();
 }
 
 export async function fetchSampleData(): Promise<OptimizeResponse> {

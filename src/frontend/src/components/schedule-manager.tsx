@@ -29,23 +29,34 @@ export function ScheduleManager() {
     try {
       setLoading(true);
       const data = await fetchSchedule();
-      setSchedule(data);
-    } catch (error) {
+      setSchedule(data || []);
+    } catch (error: any) {
       console.error("Failed to load schedule:", error);
-      alert("Failed to load schedule. Please check if the API server is running.");
+      // Don't show alert on initial load - just log and use empty schedule
+      // User can retry by refreshing
+      setSchedule([]);
+      console.warn("Schedule will be empty. API may not be available.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleAdd = async () => {
-    if (!formData.name) {
+    if (!formData.name || !formData.name.trim()) {
       alert("Please enter a name for the schedule item");
       return;
     }
 
     try {
-      const newItem = await addScheduleItem(formData as ScheduleItem);
+      // Prepare data - remove empty strings, convert time format if needed
+      const payload: ScheduleItem = {
+        name: formData.name.trim(),
+        location: formData.location?.trim() || undefined,
+        start_time: formData.start_time?.trim() || undefined,
+        end_time: formData.end_time?.trim() || undefined,
+      };
+
+      const newItem = await addScheduleItem(payload);
       setSchedule([...schedule, newItem].sort((a, b) => {
         const aTime = a.start_time || a.end_time || "";
         const bTime = b.start_time || b.end_time || "";
@@ -54,18 +65,27 @@ export function ScheduleManager() {
       setFormData({ name: "", location: "", start_time: "", end_time: "" });
       setShowAddForm(false);
     } catch (error: any) {
-      alert(`Failed to add schedule item: ${error.message}`);
+      console.error("Add schedule error:", error);
+      alert(`Failed to add schedule item: ${error.message || "Network error. Please check if the API server is running."}`);
     }
   };
 
   const handleUpdate = async (id: string) => {
-    if (!formData.name) {
+    if (!formData.name || !formData.name.trim()) {
       alert("Please enter a name for the schedule item");
       return;
     }
 
     try {
-      const updated = await updateScheduleItem(id, formData as ScheduleItem);
+      // Prepare data - remove empty strings
+      const payload: ScheduleItem = {
+        name: formData.name.trim(),
+        location: formData.location?.trim() || undefined,
+        start_time: formData.start_time?.trim() || undefined,
+        end_time: formData.end_time?.trim() || undefined,
+      };
+
+      const updated = await updateScheduleItem(id, payload);
       setSchedule(
         schedule
           .map((item) => (item.id === id ? updated : item))
@@ -78,7 +98,8 @@ export function ScheduleManager() {
       setEditingId(null);
       setFormData({ name: "", location: "", start_time: "", end_time: "" });
     } catch (error: any) {
-      alert(`Failed to update schedule item: ${error.message}`);
+      console.error("Update schedule error:", error);
+      alert(`Failed to update schedule item: ${error.message || "Network error. Please check if the API server is running."}`);
     }
   };
 
@@ -115,6 +136,9 @@ export function ScheduleManager() {
   if (loading) {
     return (
       <section className="rounded-2xl border border-zinc-200 bg-white/70 p-5 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-zinc-900">Manage Schedule</h2>
+        </div>
         <p className="text-zinc-600">Loading schedule...</p>
       </section>
     );
