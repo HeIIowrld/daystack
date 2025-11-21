@@ -82,8 +82,11 @@ function TodoBoard({
           >
             <div>
               <p className="font-medium">{todo.task}</p>
-              {todo.course ? (
-                <p className="text-xs text-zinc-500">{todo.course}</p>
+              {todo.course_display ? (
+                <p className="text-xs text-zinc-500">{todo.course_display}</p>
+              ) : null}
+              {!todo.course_display && todo.location ? (
+                <p className="text-xs text-zinc-500">{todo.location}</p>
               ) : null}
             </div>
             <span className="text-sm font-semibold">
