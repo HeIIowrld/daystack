@@ -3,6 +3,7 @@ import Image from "next/image";
 import { MapView } from "@/components/map-view";
 import { fetchSampleData } from "@/lib/api";
 import { OptimizeResponse, ScheduleItem, TodoItem } from "@/lib/types";
+import { ScheduleMap } from "./schedule-map";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ function formatTimeRange(item: ScheduleItem) {
   if (item.end_time) {
     return `- ${item.end_time}`;
   }
-  return "시간 미정";
+  return "Time TBD";
 }
 
 function ScheduleSection({
@@ -80,7 +81,7 @@ function TodoBoard({
               ) : null}
             </div>
             <span className="text-sm font-semibold">
-              {todo.estimated_time}분
+              {todo.estimated_time} min
             </span>
           </li>
         ))}
@@ -96,7 +97,9 @@ function RemainingTodoSection({ todos }: { todos: TodoItem[] }) {
         Remaining Tasks
       </h2>
       {todos.length === 0 ? (
-        <p className="mt-4 text-sm text-amber-800">모든 작업이 일정에 배치되었습니다.</p>
+        <p className="mt-4 text-sm text-amber-800">
+          Everything is already scheduled. Nicely done!
+        </p>
       ) : (
         <ul className="mt-4 space-y-3">
           {todos.map((todo) => (
@@ -105,7 +108,9 @@ function RemainingTodoSection({ todos }: { todos: TodoItem[] }) {
               className="flex items-center justify-between rounded-xl border border-amber-100 bg-white/80 px-4 py-3 text-amber-900"
             >
               <span>{todo.task}</span>
-              <span className="text-sm font-medium">{todo.estimated_time}분</span>
+              <span className="text-sm font-medium">
+                {todo.estimated_time} min
+              </span>
             </li>
           ))}
         </ul>
@@ -144,16 +149,24 @@ export default async function Home() {
             </p>
           </div>
           <h1 className="mt-4 text-4xl font-semibold text-zinc-900">
-            이동 시간을 고려한 일정 최적화
+            Travel-aware schedule optimizer
           </h1>
           <p className="mt-3 max-w-3xl text-lg text-zinc-600">
+<<<<<<< HEAD
             DAYSTACK 메인 컨트롤러의 스케줄/과제 데이터를 FastAPI 백엔드에서
             가져와 시각화합니다. 백엔드가 Coursemos 크롤러를 통해 과제를 모으고
             스케줄러에 전달하면, 이 페이지는 결과를 즉시 보여줍니다.
+=======
+            The backend API combines your course schedule, tasks, and travel
+            time to build an optimized day plan. Ensure the FastAPI server is
+            running locally and map credentials are configured to see live data.
+>>>>>>> 5a1bfb6 (scheduling algorithm)
           </p>
           <div className="mt-6 flex flex-wrap gap-4 text-sm text-zinc-500">
             <span className="rounded-full bg-zinc-100 px-4 py-1">
-              API base: {process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api"}
+              API base:{" "}
+              {process.env.NEXT_PUBLIC_API_BASE_URL ??
+                "http://localhost:8000/api"}
             </span>
             {data ? (
               <span className="rounded-full bg-emerald-100 px-4 py-1 text-emerald-800">
@@ -167,23 +180,34 @@ export default async function Home() {
 
         {!data ? (
           <section className="rounded-3xl border border-rose-100 bg-rose-50 px-8 py-10 text-rose-900 shadow-sm">
-            <h2 className="text-2xl font-semibold">백엔드 연결 필요</h2>
+            <h2 className="text-2xl font-semibold">Backend connection needed</h2>
             <p className="mt-3 text-base">
-              FastAPI 서버가 실행 중인지 확인하세요:
+              Please confirm the FastAPI server is running and reachable.
             </p>
             <pre className="mt-4 rounded-2xl bg-rose-100 px-4 py-3 text-sm font-semibold text-rose-900">
               uvicorn backend.api:app --reload --app-dir src
             </pre>
             <p className="mt-4 text-sm">
-              서버가 준비되면 이 페이지가 자동으로 샘플 결과를 표시합니다.
+              When the server is available, this page will automatically show
+              live data including the route map.
             </p>
           </section>
         ) : (
           <>
+<<<<<<< HEAD
             <MapView schedule={data.optimized_schedule} />
             <div className="grid gap-6 md:grid-cols-2">
               <ScheduleSection title="Original Schedule" items={data.schedule} />
               <ScheduleSection title="Optimized Timeline" items={data.optimized_schedule} />
+=======
+            <ScheduleMap items={data.optimized_schedule} />
+            <div className="grid gap-6 md:grid-cols-2">
+              <ScheduleSection title="Original Schedule" items={data.schedule} />
+              <ScheduleSection
+                title="Optimized Timeline"
+                items={data.optimized_schedule}
+              />
+>>>>>>> 5a1bfb6 (scheduling algorithm)
               <TodoBoard title="Todo Backlog" todos={data.todos} />
               <RemainingTodoSection todos={data.remaining_todos} />
             </div>

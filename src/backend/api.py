@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from backend.config import Config
-from backend.location_utils import ensure_coordinates
+from backend.geocoding import get_location_coords
 from backend.sample_data import get_sample_schedule, get_sample_todos
 from backend.scheduler import allocate_tasks
 
@@ -36,12 +36,18 @@ class ScheduleItem(BaseModel):
     start_time: str | None = None
     end_time: str | None = None
     type: str | None = None
-    coordinates: Coordinates | None = None
+    coordinates: "Coordinates" | None = None
+
+
+class Coordinates(BaseModel):
+    lat: float
+    lng: float
 
 
 class TodoItem(BaseModel):
     task: str
     estimated_time: int = Field(..., gt=0, description="Minutes required")
+    location: str | None = None
     deadline: str | None = None
     course: str | None = None
 
@@ -103,8 +109,38 @@ def _run_optimization(
     schedule: List[ScheduleItem],
     todos: List[TodoItem],
 ) -> OptimizeResponse:
+    def _parse_coordinates(raw: str | None) -> Coordinates | None:
+        if not raw:
+            return None
+        try:
+            lng_str, lat_str = raw.split(",", maxsplit=1)
+            return Coordinates(lat=float(lat_str), lng=float(lng_str))
+        except (ValueError, TypeError):
+            return None
+
+    def _attach_coordinates(
+        items: List[ScheduleItem],
+        cache: dict[str, Coordinates | None],
+    ) -> List[ScheduleItem]:
+        enhanced: List[ScheduleItem] = []
+        for item in items:
+            coords = item.coordinates
+            if not coords and item.location:
+                if item.location not in cache:
+                    cache[item.location] = _parse_coordinates(
+                        get_location_coords(item.location)
+                    )
+                coords = cache[item.location]
+            enhanced.append(
+                item.model_copy(update={"coordinates": coords})
+            )
+        return enhanced
+
+    coord_cache: dict[str, Coordinates | None] = {}
+
     schedule_payload = [
-        item.model_dump(exclude_none=True) for item in schedule
+        item.model_dump(exclude_none=True, exclude={"coordinates"})
+        for item in schedule
     ]
     todo_payload = [item.model_dump(exclude_none=True) for item in todos]
 
@@ -117,17 +153,14 @@ def _run_optimization(
         return_summary=True,
     )
 
-    schedule_with_coords = ensure_coordinates(schedule_payload)
-    optimized_with_coords = ensure_coordinates(optimized_schedule)
-
-    optimized_models = [
-        ScheduleItem(**entry) for entry in optimized_with_coords
-    ]
+    optimized_models = [ScheduleItem(**entry) for entry in optimized_schedule]
 
     return OptimizeResponse(
-        schedule=[ScheduleItem(**entry) for entry in schedule_with_coords],
+        schedule=_attach_coordinates(schedule, coord_cache),
         todos=todos,
-        optimized_schedule=optimized_models,
+        optimized_schedule=_attach_coordinates(
+            optimized_models, coord_cache
+        ),
         remaining_todos=[TodoItem(**todo) for todo in remaining],
         meta=SchedulerMeta(
             config_ready=_config_ready(),
