@@ -12,8 +12,8 @@ def geocode(address):
     
     # 2. Use Standard Capitalization
     headers = {
-        "X-NCP-APIGW-API-KEY-ID": CLIENT_ID,
-        "X-NCP-APIGW-API-KEY": CLIENT_SECRET,
+        "X-NCP-APIGW-API-KEY-ID": LOC_CLIENT_ID,
+        "X-NCP-APIGW-API-KEY": LOC_CLIENT_SECRET,
     }
     
     try:
@@ -42,8 +42,8 @@ def get_travel_duration(start, goal):
     
     # 2. Use Standard Capitalization here too
     headers = {
-        "X-NCP-APIGW-API-KEY-ID": CLIENT_ID,
-        "X-NCP-APIGW-API-KEY": CLIENT_SECRET,
+        "X-NCP-APIGW-API-KEY-ID": NAVER_CLIENT_ID,
+        "X-NCP-APIGW-API-KEY": NAVER_CLIENT_SECRET,
     }
     
     params = {
