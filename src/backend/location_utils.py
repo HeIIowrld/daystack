@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
-from .geocoding import get_location_coords
+from backend.geocoding import get_location_coords
 
 KNOWN_COORDINATES: Dict[str, Dict[str, float]] = {
     "강남역": {"lat": 37.497952, "lng": 127.027926},
