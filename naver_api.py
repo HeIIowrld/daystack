@@ -71,3 +71,30 @@ def get_travel_duration(start, goal):
         print(f"Directions Exception: {e}")
     
     return 0
+
+
+def get_travel_duration_from_addresses(start_address, goal_address):
+    """Get travel duration between two addresses (geocode then calculate)"""
+    print(f"\nCalculating: {start_address} -> {goal_address}")
+    
+    start_coords = geocode(start_address)
+    goal_coords = geocode(goal_address)
+    
+    if not start_coords or not goal_coords:
+        print("Failed to geocode")
+        return 0
+    
+    return get_travel_duration(start_coords, goal_coords)
+
+
+if __name__ == "__main__":
+    print("="*60)
+    print("Testing Naver Maps API")
+    print("="*60)
+    
+    duration = get_travel_duration_from_addresses("강남역", "판교역")
+    
+    if duration > 0:
+        print(f"\nSUCCESS! Total: {duration}min")
+    else:
+        print("\nFAILED")
