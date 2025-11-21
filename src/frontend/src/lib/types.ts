@@ -17,6 +17,7 @@ export type TodoItem = {
   estimated_time: number;
   deadline?: string;
   course?: string;
+  course_display?: string;
   link?: string;
   source?: string;
 };
