@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { LiveTasksPanel } from "@/components/live-tasks-panel";
 import { MapView } from "@/components/map-view";
 import { fetchSampleData } from "@/lib/api";
 import {
@@ -243,6 +244,7 @@ export default async function Home() {
           <>
             <InsightsPanel insights={data.insights} />
             <MapView items={data.optimized_schedule} />
+            <LiveTasksPanel />
             <div className="grid gap-6 md:grid-cols-2">
               <ScheduleSection title="Original Schedule" items={data.schedule} />
               <ScheduleSection
