@@ -10,10 +10,10 @@ from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from backend.config import Config
-from backend.geocoding import get_location_coords
-from backend.sample_data import get_sample_schedule, get_sample_todos
-from backend.scheduler import allocate_tasks
+from .config import Config
+from .geocoding import get_location_coords
+from .sample_data import get_sample_schedule, get_sample_todos
+from .scheduler import allocate_tasks
 
 
 def _config_ready() -> bool:

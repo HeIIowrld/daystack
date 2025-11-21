@@ -9,7 +9,7 @@ from typing import Dict, List
 
 from daystack import get_crawler_tasks, get_schedule
 
-from backend.location_utils import ensure_coordinates
+from .location_utils import ensure_coordinates
 
 FALLBACK_TASKS = [
     {"task": "온라인 강의 듣기", "estimated_time": 40},

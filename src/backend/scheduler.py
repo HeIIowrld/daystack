@@ -6,7 +6,7 @@ Now orders tasks inside each gap using travel-time-aware routing.
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple
 
-from backend.directions import get_travel_time_from_addresses
+from .directions import get_travel_time_from_addresses
 
 
 def parse_time(time_str: str) -> datetime:

@@ -5,7 +5,7 @@ Uses Naver Maps Geocoding API
 
 import requests
 
-from backend.config import Config
+from .config import Config
 
 
 def get_location_coords(address):
@@ -25,11 +25,7 @@ def get_location_coords(address):
         print(f"Error: Empty address provided")
         return None
     
-<<<<<<< HEAD
-    url = f"https://maps.apigw.ntruss.com/map-direction/v1/driving"
-=======
-    url = f"https://maps.apigw.ntruss.com/map-geocode/v2/geocode"
->>>>>>> 982aa41f098ce56c6c07f6784c8d7d70fbb48feb
+    url = f"https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode"
     headers = {
         "X-NCP-APIGW-API-KEY-ID": Config.LOC_CLIENT_ID,
         "X-NCP-APIGW-API-KEY": Config.LOC_CLIENT_SECRET,

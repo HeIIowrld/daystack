@@ -5,8 +5,8 @@ Uses Naver Maps Directions 5 API
 
 import requests
 
-from backend.config import Config
-from backend.geocoding import get_location_coords
+from .config import Config
+from .geocoding import get_location_coords
 
 
 def get_travel_time(start_coords, end_coords, include_buffer=True):

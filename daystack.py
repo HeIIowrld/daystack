@@ -38,7 +38,6 @@ def manual_input_tasks():
     """Manual task input"""
     print("\n📝 Enter tasks (empty line to finish):\n")
     tasks: List[Dict] = []
-    tasks: List[Dict] = []
     
     while True:
         name = input("Task name: ").strip()
@@ -47,7 +46,6 @@ def manual_input_tasks():
         
         try:
             duration = int(input("Duration (minutes): ").strip())
-            tasks.append({"task": name, "estimated_time": duration})
             tasks.append({"task": name, "estimated_time": duration})
             print("✓ Added\n")
         except ValueError:
@@ -58,7 +56,7 @@ def manual_input_tasks():
 def convert_lms_tasks(lms_tasks):
     """
     Convert LMS crawler output to Scheduler format.
-    Since LMS doesn't provide 'duration', we set a default.
+    Scheduler expects: 'task' and 'estimated_time'
     """
     formatted_tasks = []
     print(f"\n📥 Converting {len(lms_tasks)} LMS tasks...")
@@ -71,10 +69,9 @@ def convert_lms_tasks(lms_tasks):
         default_duration = 60 
         
         formatted_tasks.append({
-            "name": full_name,
-            "duration": default_duration,
-            # You can pass due_date to scheduler if it supports it
-            # "due_date": t['due_date'] 
+            "task": full_name,
+            "estimated_time": default_duration,
+            "course": t.get('course', ''),
         })
     return formatted_tasks
 
@@ -116,16 +113,14 @@ def main():
         print("⚠️  No tasks to schedule")
         return
     
+    # Get schedule
+    schedule = get_schedule()
+    
     print("\n📅 Today's Schedule:")
     for event in schedule:
         start = event.get('start_time', '')
         end = event.get('end_time', '')
         print(f"  {start}-{end}: {event['name']} @ {event['location']}")
-    
-    print("\n📚 Tasks:")
-    for task in tasks:
-        course = f" ({task['course']})" if task.get("course") else ""
-        print(f"  - {task['task']}{course} / {task['estimated_time']}분")
     
     print("\n📚 Tasks:")
     for task in tasks:

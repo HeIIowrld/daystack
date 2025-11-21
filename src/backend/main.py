@@ -5,12 +5,12 @@ Automatic schedule optimization with travel time consideration.
 
 import sys
 
-from backend.config import Config
-from backend.coursemos_crawler import CoursemosCrawler
-from backend.directions import get_travel_time_from_addresses
-from backend.geocoding import get_location_coords
-from backend.sample_data import get_sample_schedule, get_sample_todos
-from backend.scheduler import allocate_tasks, print_schedule
+from .config import Config
+from .coursemos_crawler import CoursemosCrawler
+from .directions import get_travel_time_from_addresses
+from .geocoding import get_location_coords
+from .sample_data import get_sample_schedule, get_sample_todos
+from .scheduler import allocate_tasks, print_schedule
 
 
 def print_banner():
