@@ -5,6 +5,7 @@ Optimizing your daily tasks with travel time consideration
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple
 
@@ -152,6 +153,42 @@ def resolve_course_location(course_name: str) -> str:
     return get_college_location(code)
 
 
+def _normalize_course_header(raw_header: str) -> Tuple[str, str | None, str | None]:
+    """Extract title, course code, instructor from raw bracketed text."""
+    header = raw_header.strip()
+    if header.startswith("[") and header.endswith("]"):
+        header = header[1:-1]
+
+    instructor = None
+    if "/" in header:
+        header, instructor = [part.strip() for part in header.split("/", 1)]
+
+    code_match = re.search(r"([A-Z]{3}\d{4}\.\d{2}-\d{2})", header)
+    course_code = code_match.group(1) if code_match else None
+
+    # remove repeated codes and semester markers
+    if course_code:
+        header = header.replace(course_code, "").strip()
+    header = header.replace("(2학기)", "").strip()
+
+    return header, course_code, instructor
+
+
+def format_task_label(raw_course: str, task_title: str) -> str:
+    title, course_code, instructor = _normalize_course_header(raw_course)
+    parts = [title]
+    if course_code:
+        parts.append(f"({course_code})")
+    formatted = " ".join(part for part in parts if part)
+
+    body = task_title.strip()
+    if body:
+        formatted = f"{formatted} · {body}"
+    if instructor:
+        formatted = f"{formatted} — {instructor}"
+    return formatted
+
+
 def convert_lms_tasks(lms_tasks):
     """
     Convert LMS crawler output to Scheduler format.
@@ -165,7 +202,7 @@ def convert_lms_tasks(lms_tasks):
         location = resolve_course_location(course_name)
         
         # Combine Course and Task Name for clarity
-        full_name = f"[{course_name}] {t['task']}"
+        full_name = format_task_label(course_name, t['task'])
         
         # Heuristic: Default to 60 mins for assignments, can be adjusted
         default_duration = 60 
@@ -223,7 +260,7 @@ def build_schedule_from_lms(raw_tasks: List[Dict]) -> List[Dict]:
             continue
 
         start_dt = due_dt - timedelta(minutes=DEFAULT_TASK_DURATION)
-        title = f"[{task.get('course', '과제')}] {task.get('task')}"
+        title = format_task_label(task.get('course', '과제'), task.get('task', ""))
         location = resolve_course_location(task.get("course", ""))
 
         events.append(
